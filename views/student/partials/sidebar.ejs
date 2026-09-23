@@ -1,0 +1,27 @@
+<div class="sidebar">
+  <div class="sidebar-brand">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+      <img src="/images/pust-logo.png" alt="PUST" style="width:42px;height:42px;border-radius:50%;object-fit:contain;background:#fff;padding:2px;border:2px solid var(--accent);" onerror="this.style.display='none'">
+      <div>
+        <div style="font-size:15px;font-weight:800;color:#fff;line-height:1.1;">July-6 Hall</div>
+        <div style="font-size:10px;opacity:.65;">PUST — Student Portal</div>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-name">👤 <%= user.name %></div>
+    <span class="user-role">Student</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="/student/dashboard" class="<%= title==='My Dashboard'?'active':'' %>"><span class="nav-icon">🏠</span> Dashboard</a>
+    <a href="/student/profile" class="<%= title==='My Profile'?'active':'' %>"><span class="nav-icon">👤</span> My Profile</a>
+    <a href="/student/notices" class="<%= title==='Notice Board'?'active':'' %>"><span class="nav-icon">📢</span> Notices</a>
+    <a href="/student/meals" class="<%= title==='Dining'?'active':'' %>"><span class="nav-icon">🍽️</span> Dining & Tokens</a>
+    <a href="/student/dues" class="<%= title==='My Dues & Payments'?'active':'' %>"><span class="nav-icon">💰</span> Dues & Payments</a>
+    <a href="/student/complaints" class="<%= title==='My Complaints'?'active':'' %>"><span class="nav-icon">📝</span> Complaints</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="/" style="color:rgba(255,255,255,.6);font-size:12px;display:block;margin-bottom:8px;">🏠 Home Page</a>
+    <a href="/auth/logout">🚪 Logout</a>
+  </div>
+</div>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> — July-6 Hall</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <%- include('partials/sidebar') %>
+  <div class="main-content">
+    <div class="topbar"><h1>📝 Complaints</h1></div>
+    <div class="page-content">
+      <% if (success.length) { %><div class="alert alert-success">✓ <%= success %></div><% } %>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+        <a href="/admin/complaints" class="btn btn-sm <%= !filter?'btn-primary':'btn-outline' %>">All</a>
+        <a href="/admin/complaints?status=pending" class="btn btn-sm <%= filter==='pending'?'btn-primary':'btn-outline' %>">⏳ Pending</a>
+        <a href="/admin/complaints?status=in_progress" class="btn btn-sm <%= filter==='in_progress'?'btn-primary':'btn-outline' %>">🔄 In Progress</a>
+        <a href="/admin/complaints?status=resolved" class="btn btn-sm <%= filter==='resolved'?'btn-primary':'btn-outline' %>">✅ Resolved</a>
+      </div>
+      <% if (complaints.length) { %>
+        <% complaints.forEach(c => { %>
+        <div class="card" style="margin-bottom:14px;">
+          <div class="card-body">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px;">
+              <div>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+                  <strong style="font-size:15px;"><%= c.subject %></strong>
+                  <span class="badge badge-secondary">
+                    <%= c.category==='water'?'💧 Water':c.category==='electricity'?'⚡ Electricity':c.category==='food'?'🍽️ Food Issue':c.category==='maintenance'?'🔧 Maintenance':c.category==='security'?'🔒 Security':'📋 Other' %>
+                  </span>
+                  <span class="badge badge-<%= c.status==='resolved'?'success':c.status==='in_progress'?'info':'warning' %>">
+                    <%= c.status.replace('_',' ') %>
+                  </span>
+                </div>
+                <div style="font-size:12px;color:var(--muted);">By <strong><%= c.student_name %></strong> (<%= c.student_id %>) · <%= new Date(c.created_at).toLocaleString() %></div>
+              </div>
+            </div>
+            <p style="font-size:13px;margin-bottom:12px;"><%= c.description %></p>
+            <% if(c.admin_reply){ %>
+            <div class="complaint-reply"><strong style="font-size:12px;color:var(--info);">Admin Reply:</strong><p style="margin-top:4px;"><%= c.admin_reply %></p></div>
+            <% } %>
+            <% if(c.status !== 'resolved'){ %>
+            <form action="/admin/complaints/<%= c.id %>/reply" method="POST" style="margin-top:12px;">
+              <div class="form-row">
+                <div class="form-group"><label>Reply</label><textarea name="admin_reply" class="form-control" rows="2" style="resize:vertical;"><%= c.admin_reply||'' %></textarea></div>
+                <div class="form-group"><label>Update Status</label>
+                  <select name="status" class="form-control">
+                    <option value="pending" <%= c.status==='pending'?'selected':'' %>>Pending</option>
+                    <option value="in_progress" <%= c.status==='in_progress'?'selected':'' %>>In Progress</option>
+                    <option value="resolved" <%= c.status==='resolved'?'selected':'' %>>Resolved</option>
+                  </select>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary btn-sm">Send Reply</button>
+            </form>
+            <% } %>
+          </div>
+        </div>
+        <% }) %>
+      <% } else { %>
+      <div class="card"><div class="card-body"><div class="empty-state"><div class="empty-icon">📝</div><p>No complaints found.</p></div></div></div>
+      <% } %>
+    </div>
+  </div>
+</div>
+</body></html>

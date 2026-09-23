@@ -1,0 +1,39 @@
+<div class="sidebar">
+  <div class="sidebar-brand">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+      <img src="/images/pust-logo.png" alt="PUST" style="width:42px;height:42px;border-radius:50%;object-fit:contain;background:#fff;padding:2px;border:2px solid var(--accent);" onerror="this.style.display='none'">
+      <div>
+        <div style="font-size:15px;font-weight:800;color:#fff;line-height:1.1;">July-6 Hall</div>
+        <div style="font-size:10px;opacity:.65;">PUST — Admin Panel</div>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-name">👤 <%= user.name %></div>
+    <span class="user-role">Administrator</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Overview</div>
+    <a href="/admin/dashboard" class="<%= title==='Admin Dashboard'?'active':'' %>"><span class="nav-icon">📊</span> Dashboard</a>
+    <div class="nav-section-label">Hall Management</div>
+    <a href="/admin/students" class="<%= title==='Manage Students'?'active':'' %>"><span class="nav-icon">👥</span> Students</a>
+    <a href="/admin/rooms" class="<%= title==='Room Management'?'active':'' %>"><span class="nav-icon">🏠</span> Rooms</a>
+    <a href="/admin/allocations" class="<%= title==='Seat Allocation'?'active':'' %>"><span class="nav-icon">🔑</span> Seat Allocation</a>
+    <a href="/admin/dues" class="<%= title==='Monthly Dues'?'active':'' %>"><span class="nav-icon">💰</span> Monthly Dues</a>
+    <div class="nav-section-label">Dining</div>
+    <a href="/admin/menus" class="<%= title==='Meal Menus'?'active':'' %>"><span class="nav-icon">🍽️</span> Meal Menus</a>
+    <div class="nav-section-label">Communication</div>
+    <a href="/admin/notices" class="<%= title==='Notice Board'?'active':'' %>"><span class="nav-icon">📢</span> Notices</a>
+    <a href="/admin/complaints" class="<%= title==='Complaints'?'active':'' %>"><span class="nav-icon">📝</span> Complaints</a>
+    <a href="/admin/administration" class="<%= title==='Administration'?'active':'' %>"><span class="nav-icon">🧑‍💼</span> Administration</a>
+    <a href="/admin/settings" class="<%= title==='Contact & Location'?'active':'' %>"><span class="nav-icon">📍</span> Contact & Location</a>
+    <div class="nav-section-label">Finance</div>
+    <a href="/admin/payments/hall" class="<%= title==='Hall Payment History'?'active':'' %>"><span class="nav-icon">🏠</span> Hall Payments</a>
+    <a href="/admin/payments/dining" class="<%= title==='Dining Payment History'?'active':'' %>"><span class="nav-icon">🍽️</span> Dining Payments</a>
+    <a href="/admin/reports" class="<%= title==='Reports'?'active':'' %>"><span class="nav-icon">📈</span> Reports</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="/" style="color:rgba(255,255,255,.6);font-size:12px;display:block;margin-bottom:8px;">🏠 Home Page</a>
+    <a href="/auth/logout">🚪 Logout</a>
+  </div>
+</div>

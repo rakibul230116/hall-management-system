@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Payment Records — July-6 Hall</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <%- include('partials/sidebar') %>
+  <div class="main-content">
+    <div class="topbar"><h1>💳 Payment Records</h1></div>
+    <div class="page-content">
+      <div class="card">
+        <div class="card-header"><h3>All Payments (<%= payments.length %>)</h3></div>
+        <div class="table-responsive">
+          <% if (payments.length) { %>
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Student</th><th>ID</th><th>Type</th><th>Amount</th><th>Month</th><th>Method</th><th>Txn ID</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody>
+              <% payments.forEach((p,i) => { %>
+              <tr>
+                <td><%= i+1 %></td>
+                <td><%= p.name %></td>
+                <td><code><%= p.student_id %></code></td>
+                <td><span class="badge badge-secondary"><%= p.payment_type.replace('_',' ') %></span></td>
+                <td><strong>৳<%= Number(p.amount).toLocaleString() %></strong></td>
+                <td><%= p.month ? p.month+' '+p.year : '—' %></td>
+                <td>
+                  <% if(p.payment_method==='bkash'){ %>
+                  <span style="background:#e2136e;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;">bKash</span>
+                  <% } else { %><span class="badge badge-secondary"><%= p.payment_method %></span><% } %>
+                </td>
+                <td><code style="font-size:11px;"><%= p.transaction_id||'—' %></code></td>
+                <td><span class="badge badge-<%= p.status==='paid'?'success':'warning' %>"><%= p.status %></span></td>
+                <td style="font-size:12px;"><%= new Date(p.payment_date).toLocaleDateString() %></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+          <% } else { %><div class="empty-state"><div class="empty-icon">💳</div><p>No payment records yet.</p></div><% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body></html>

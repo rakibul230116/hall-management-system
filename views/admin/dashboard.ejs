@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Admin Dashboard — July-6 Hall</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <%- include('partials/sidebar') %>
+  <div class="main-content">
+    <div class="topbar">
+      <div>
+        <h1 style="font-size:20px;font-weight:800;">📊 Admin Dashboard</h1>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">July-6 Hall — PUST · <%= new Date().toDateString() %></div>
+      </div>
+    </div>
+    <div class="page-content">
+      <% if (success.length) { %><div class="alert alert-success">✓ <%= success %></div><% } %>
+      <% if (error.length) { %><div class="alert alert-error">✕ <%= error %></div><% } %>
+
+      <!-- Stats (real-time via Socket.io, see script at bottom) -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue">👥</div>
+          <div><div class="stat-value" id="stat-totalStudents"><%= stats.totalStudents||0 %></div><div class="stat-label">Total Students</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">🏠</div>
+          <div><div class="stat-value" id="stat-availableRooms"><%= stats.availableRooms||0 %>/<%= stats.totalRooms||0 %></div><div class="stat-label">Available Rooms</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon amber">🛏️</div>
+          <div><div class="stat-value" id="stat-occupiedSeats"><%= stats.occupiedSeats||0 %>/<%= stats.totalCapacity||0 %></div><div class="stat-label">Occupied Seats</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red">⚠️</div>
+          <div><div class="stat-value" id="stat-pendingPayments"><%= stats.pendingPayments||0 %></div><div class="stat-label">Pending Payments</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon indigo">📝</div>
+          <div><div class="stat-value"><%= stats.pendingComplaints||0 %></div><div class="stat-label">Pending Complaints</div></div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-header"><h3>⚡ Quick Actions</h3></div>
+        <div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap;">
+          <a href="/admin/allocations" class="btn btn-primary">🔑 Allocate Seat</a>
+          <a href="/admin/dues" class="btn btn-accent">💰 Manage Dues</a>
+          <a href="/admin/notices" class="btn btn-info">📢 Post Notice</a>
+          <a href="/admin/menus" class="btn btn-success">🍽️ Add Menu</a>
+          <a href="/admin/complaints" class="btn btn-outline">📝 View Complaints</a>
+          <a href="/admin/reports" class="btn btn-outline">📈 Reports</a>
+        </div>
+      </div>
+
+      <div class="content-grid">
+        <!-- Recent Students -->
+        <div class="card">
+          <div class="card-header"><h3>👥 Recent Students</h3><a href="/admin/students" class="btn btn-sm btn-outline">View All</a></div>
+          <div class="table-responsive">
+            <% if (recentStudents.length) { %>
+            <table class="data-table">
+              <thead><tr><th>Name</th><th>Student ID</th><th>Dept</th><th>Status</th></tr></thead>
+              <tbody>
+                <% recentStudents.forEach(s => { %>
+                <tr>
+                  <td><strong><%= s.name %></strong></td>
+                  <td><code><%= s.student_id||'—' %></code></td>
+                  <td><%= s.department||'—' %></td>
+                  <td><span class="badge badge-<%= s.status==='active'?'success':'danger' %>"><%= s.status %></span></td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+            <% } else { %><div class="empty-state"><div class="empty-icon">👥</div><p>No students yet.</p></div><% } %>
+          </div>
+        </div>
+
+        <!-- Recent Notices -->
+        <div class="card">
+          <div class="card-header"><h3>📢 Recent Notices</h3><a href="/admin/notices" class="btn btn-sm btn-outline">Manage</a></div>
+          <div class="card-body">
+            <% if (recentNotices.length) { %>
+              <% recentNotices.forEach(n => { %>
+              <div class="notice-item <%= n.priority==='urgent'?'urgent':'' %>" style="margin-bottom:10px;">
+                <h4><% if(n.priority==='urgent'){%><span class="badge badge-danger" style="font-size:9px;margin-right:4px;">URGENT</span><%}%><%= n.title %></h4>
+                <p><%= n.content.substring(0,90) %><%= n.content.length>90?'...':'' %></p>
+                <div class="notice-meta">By <%= n.posted_by_name %> · <%= new Date(n.created_at).toLocaleDateString() %></div>
+              </div>
+              <% }) %>
+            <% } else { %><div class="empty-state"><div class="empty-icon">📢</div><p>No notices yet.</p></div><% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  // ── Real-time dashboard stats ──
+  // Primary path: Socket.io pushes updates the instant any admin action
+  // changes students/rooms/dues anywhere in the app (see utils/stats.js).
+  // Fallback path: if the socket connection ever drops, poll the JSON
+  // endpoint every 15s so the numbers never go stale for long.
+  function applyStats(stats) {
+    if (!stats) return;
+    const totalStudentsEl = document.getElementById('stat-totalStudents');
+    const availableRoomsEl = document.getElementById('stat-availableRooms');
+    const occupiedSeatsEl = document.getElementById('stat-occupiedSeats');
+    const pendingPaymentsEl = document.getElementById('stat-pendingPayments');
+    if (totalStudentsEl) totalStudentsEl.textContent = stats.totalStudents ?? 0;
+    if (availableRoomsEl) availableRoomsEl.textContent = `${stats.availableRooms ?? 0}/${stats.totalRooms ?? 0}`;
+    if (occupiedSeatsEl) occupiedSeatsEl.textContent = `${stats.occupiedSeats ?? 0}/${stats.totalCapacity ?? 0}`;
+    if (pendingPaymentsEl) pendingPaymentsEl.textContent = stats.pendingPayments ?? 0;
+  }
+
+  try {
+    const socket = io();
+    socket.on('stats:update', applyStats);
+  } catch (e) {
+    console.warn('Socket.io unavailable, falling back to polling only.', e);
+  }
+
+  // Polling fallback, runs regardless (cheap safety net even with sockets up)
+  setInterval(async () => {
+    try {
+      const r = await fetch('/admin/dashboard/stats');
+      const d = await r.json();
+      if (d.ok) applyStats(d.stats);
+    } catch (e) { /* network hiccup, ignore and retry next tick */ }
+  }, 15000);
+</script>
+</body></html>

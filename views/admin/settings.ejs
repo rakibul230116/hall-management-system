@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Contact & Location — July-6 Hall</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <%- include('partials/sidebar') %>
+  <div class="main-content">
+    <div class="topbar"><h1>📍 Contact & Location</h1></div>
+    <div class="page-content">
+      <%- include('../partials/back-button') %>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:18px;">
+        This information is shown on the public homepage's "Find Us" section.
+      </p>
+
+      <div class="card" style="max-width:640px;">
+        <div class="card-header"><h3>Hall Contact Details</h3></div>
+        <div class="card-body">
+          <form action="/admin/settings/update" method="POST">
+            <div class="form-group">
+              <label>Hall Address</label>
+              <textarea name="address" class="form-control" rows="3" style="resize:vertical;"><%= settings.address||'' %></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Contact Phone</label><input type="text" name="phone" class="form-control" value="<%= settings.phone||'' %>" placeholder="+880-XXX-XXXXXXX"></div>
+              <div class="form-group"><label>Contact Email</label><input type="email" name="email" class="form-control" value="<%= settings.email||'' %>" placeholder="july6hall@pust.ac.bd"></div>
+            </div>
+            <div class="form-group">
+              <label>Google Maps Embed URL</label>
+              <input type="url" name="map_embed_url" class="form-control" value="<%= settings.map_embed_url||'' %>" placeholder="https://www.google.com/maps/embed?...">
+              <small style="color:var(--muted);">In Google Maps: Share → Embed a map → copy the URL inside src="..."</small>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Facebook Page URL</label><input type="url" name="facebook_url" class="form-control" value="<%= settings.facebook_url||'' %>" placeholder="https://facebook.com/..."></div>
+              <div class="form-group"><label>Website URL</label><input type="url" name="website_url" class="form-control" value="<%= settings.website_url||'' %>" placeholder="https://pust.ac.bd"></div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">Save Changes</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body></html>

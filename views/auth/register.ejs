@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Register — July-6 Hall</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body{margin:0;}
+    .auth-page{min-height:100vh;display:flex;align-items:stretch;}
+    .auth-left{flex:1;position:relative;display:flex;align-items:center;justify-content:center;padding:40px;}
+    .auth-left-bg{position:absolute;inset:0;background:url('/images/hall-bg.jpg') center/cover no-repeat;}
+    .auth-left-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(160deg,rgba(10,35,66,0.90),rgba(10,60,120,0.82));}
+    .auth-left-content{position:relative;z-index:1;text-align:center;color:#fff;max-width:380px;}
+    .auth-right{width:520px;flex-shrink:0;background:#fff;display:flex;align-items:center;justify-content:center;padding:36px 44px;box-shadow:-8px 0 40px rgba(0,0,0,0.12);overflow-y:auto;}
+    .auth-form-box{width:100%;}
+    @media(max-width:768px){.auth-left{display:none;}.auth-right{width:100%;box-shadow:none;padding:28px 20px;}}
+  </style>
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-left">
+    <div class="auth-left-bg"></div>
+    <div class="auth-left-content">
+      <img src="/images/pust-logo.png" alt="PUST" style="width:80px;height:80px;border-radius:50%;object-fit:contain;background:#fff;padding:4px;border:3px solid var(--accent);margin-bottom:16px;" onerror="this.style.display='none'">
+      <h1 style="font-size:28px;font-weight:900;margin-bottom:8px;">July-6 Hall</h1>
+      <p style="font-size:14px;opacity:.8;line-height:1.6;">Pabna University of Science & Technology<br>Student Residential Hall Management System</p>
+    </div>
+  </div>
+  <div class="auth-right">
+    <div class="auth-form-box">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+        <img src="/images/pust-logo.png" style="width:40px;height:40px;border-radius:50%;object-fit:contain;border:2px solid var(--primary);" onerror="this.style.display='none'">
+        <div><div style="font-size:15px;font-weight:800;color:var(--primary);">July-6 Hall</div><div style="font-size:11px;color:var(--muted);">Student Registration</div></div>
+      </div>
+      <div style="font-size:20px;font-weight:800;margin-bottom:4px;">Create Account</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:20px;">Fill in your details to register</div>
+
+      <% if (error.length) { %><div class="alert alert-error">✕ <%= error %></div><% } %>
+
+      <form action="/auth/register" method="POST">
+        <div class="form-row">
+          <div class="form-group"><label>Full Name *</label><input type="text" name="name" class="form-control" placeholder="Your Full Name" required></div>
+          <div class="form-group"><label>Student ID *</label><input type="text" name="student_id" class="form-control" placeholder="2001234" required></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Email *</label><input type="email" name="email" class="form-control" placeholder="student@pust.ac.bd" required></div>
+          <div class="form-group"><label>Phone</label><input type="text" name="phone" class="form-control" placeholder="01XXXXXXXXX"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Department</label>
+            <select name="department" class="form-control">
+              <option>CSE</option><option>EEE</option><option>ME</option><option>CE</option><option>TE</option><option>Other</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Session</label><input type="text" name="session" class="form-control" placeholder="2020-21"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Gender</label>
+            <select name="gender" class="form-control"><option value="male">Male</option><option value="female">Female</option></select>
+          </div>
+          <div class="form-group"><label>Password *</label><input type="password" name="password" class="form-control" placeholder="Min 6 characters" required minlength="6"></div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" style="padding:12px;font-size:15px;margin-top:4px;">Create Account →</button>
+      </form>
+      <p style="text-align:center;margin-top:14px;font-size:13px;color:var(--muted);">
+        Already registered? <a href="/auth/login" style="font-weight:700;color:var(--primary);">Sign in</a> &nbsp;·&nbsp; <a href="/" style="color:var(--muted);">← Home</a>
+      </p>
+    </div>
+  </div>
+</div>
+</body></html>

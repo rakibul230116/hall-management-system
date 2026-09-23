@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>bKash Payment — July-6 Hall</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    /* ── bKash Brand Colors ── */
+    :root {
+      --bk-pink:    #e2136e;
+      --bk-dark:    #9d174d;
+      --bk-light:   #fff0f6;
+      --bk-border:  #fbc8d9;
+      --bk-gray:    #6b7280;
+      --bk-success: #16a34a;
+    }
+
+    body { background: #f3f4f6; }
+
+    .bkash-wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .bkash-card {
+      width: 100%;
+      max-width: 400px;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 40px rgba(226,19,110,0.15);
+      overflow: hidden;
+    }
+
+    /* ── Header ── */
+    .bk-header {
+      background: var(--bk-pink);
+      padding: 20px 24px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .bk-logo-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 6px 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .bk-logo-text {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--bk-pink);
+      letter-spacing: -0.5px;
+    }
+    .bk-logo-dot { width: 8px; height: 8px; background: var(--bk-pink); border-radius: 50%; }
+    .bk-header-info { color: #fff; }
+    .bk-header-info .bk-tagline { font-size: 11px; opacity: 0.85; }
+    .bk-header-info .bk-subtitle { font-size: 13px; font-weight: 600; margin-top: 2px; }
+
+    /* ── Merchant Info Bar ── */
+    .bk-merchant-bar {
+      background: var(--bk-light);
+      border-bottom: 1px solid var(--bk-border);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .bk-merchant-label { font-size: 11px; color: var(--bk-gray); }
+    .bk-merchant-name { font-size: 13px; font-weight: 700; color: var(--bk-dark); }
+    .bk-merchant-num { font-size: 13px; font-weight: 700; color: var(--bk-pink); }
+    .bk-amount-big { font-size: 26px; font-weight: 900; color: var(--bk-dark); text-align: right; }
+    .bk-amount-big span { font-size: 14px; }
+
+    /* ── Steps ── */
+    .bk-step { display: none; padding: 24px; }
+    .bk-step.active { display: block; }
+
+    .bk-step-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #111;
+      margin-bottom: 4px;
+    }
+    .bk-step-sub {
+      font-size: 12px;
+      color: var(--bk-gray);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    /* ── Input ── */
+    .bk-input-wrap { position: relative; margin-bottom: 16px; }
+    .bk-input-wrap .bk-flag {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      font-size: 18px; pointer-events: none;
+    }
+    .bk-input {
+      width: 100%;
+      padding: 13px 14px 13px 46px;
+      border: 2px solid var(--bk-border);
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #111;
+      outline: none;
+      transition: border-color .2s;
+      box-sizing: border-box;
+    }
+    .bk-input:focus { border-color: var(--bk-pink); }
+    .bk-input.no-icon { padding-left: 14px; }
+    .bk-input-error { border-color: #ef4444 !important; }
+
+    /* ── PIN Dots ── */
+    .bk-pin-wrap {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .bk-pin-dot {
+      width: 48px; height: 48px;
+      border: 2px solid var(--bk-border);
+      border-radius: 50%;
+      background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      transition: all .15s;
+    }
+    .bk-pin-dot.filled { background: var(--bk-pink); border-color: var(--bk-pink); color: #fff; }
+
+    /* ── PIN Keypad ── */
+    .bk-keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .bk-key {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 700;
+      color: #111;
+      transition: all .12s;
+      user-select: none;
+    }
+    .bk-key:active, .bk-key:hover { background: var(--bk-light); border-color: var(--bk-pink); color: var(--bk-pink); }
+    .bk-key.del { font-size: 14px; color: var(--bk-gray); }
+    .bk-key.empty { background: transparent; border-color: transparent; cursor: default; }
+
+    /* ── Buttons ── */
+    .bk-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--bk-pink);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s;
+      margin-top: 4px;
+    }
+    .bk-btn:hover { background: var(--bk-dark); }
+    .bk-btn:disabled { background: #d1d5db; cursor: not-allowed; }
+    .bk-btn-outline {
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      color: var(--bk-pink);
+      border: 2px solid var(--bk-pink);
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all .2s;
+    }
+    .bk-btn-outline:hover { background: var(--bk-light); }
+
+    /* ── Error Message ── */
+    .bk-error {
+      display: none;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      font-size: 12px;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+    }
+    .bk-error.show { display: block; }
+
+    /* ── Processing Screen ── */
+    .bk-processing {
+      text-align: center;
+      padding: 40px 24px;
+    }
+    .bk-spinner {
+      width: 60px; height: 60px;
+      border: 5px solid var(--bk-border);
+      border-top-color: var(--bk-pink);
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .bk-processing-text { font-size: 15px; font-weight: 700; color: #111; }
+    .bk-processing-sub { font-size: 12px; color: var(--bk-gray); margin-top: 6px; }
+
+    /* ── Success Screen ── */
+    .bk-success-screen {
+      text-align: center;
+      padding: 30px 24px 24px;
+    }
+    .bk-check-circle {
+      width: 72px; height: 72px;
+      background: #dcfce7;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+      margin: 0 auto 16px;
+      animation: popIn .4s ease;
+    }
+    @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .bk-success-title { font-size: 18px; font-weight: 900; color: var(--bk-success); margin-bottom: 4px; }
+    .bk-success-amount { font-size: 28px; font-weight: 900; color: #111; margin: 8px 0; }
+    .bk-receipt {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: left;
+      margin: 16px 0;
+    }
+    .bk-receipt-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .bk-receipt-row:last-child { margin-bottom: 0; }
+    .bk-receipt-label { color: var(--bk-gray); }
+    .bk-receipt-val { font-weight: 700; color: #111; }
+    .bk-receipt-val.txn { font-family: monospace; color: var(--bk-dark); letter-spacing: 1px; }
+    .bk-receipt-divider { border: none; border-top: 1px dashed #e5e7eb; margin: 10px 0; }
+
+    /* ── Token Box ── */
+    .bk-token-box {
+      background: linear-gradient(135deg, var(--bk-pink), var(--bk-dark));
+      color: #fff;
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+      margin: 12px 0;
+    }
+    .bk-token-label { font-size: 11px; opacity: 0.8; margin-bottom: 4px; }
+    .bk-token-code { font-size: 20px; font-weight: 900; letter-spacing: 2px; font-family: monospace; }
+
+    /* ── Back link ── */
+    .bk-back { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--bk-gray); cursor: pointer; margin-bottom: 14px; }
+    .bk-back:hover { color: var(--bk-pink); }
+
+    /* ── Progress dots ── */
+    .bk-progress {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      padding: 10px 0 4px;
+    }
+    .bk-prog-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--bk-border);
+      transition: background .3s;
+    }
+    .bk-prog-dot.active { background: var(--bk-pink); }
+
+    .bk-secure-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--bk-gray);
+      margin-top: 14px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="bkash-wrapper">
+  <div class="bkash-card">
+
+    <!-- Header -->
+    <div class="bk-header">
+      <div class="bk-logo-box">
+        <div class="bk-logo-dot"></div>
+        <div class="bk-logo-text">bKash</div>
+      </div>
+      <div class="bk-header-info">
+        <div class="bk-tagline">Mobile Financial Service</div>
+        <div class="bk-subtitle">Secure Payment Gateway</div>
+      </div>
+    </div>
+
+    <!-- Merchant / Amount Bar -->
+    <div class="bk-merchant-bar">
+      <div>
+        <div class="bk-merchant-label">Pay To</div>
+        <div class="bk-merchant-name">July-6 Hall (PUST)</div>
+        <div class="bk-merchant-num"><%= merchantNumber %></div>
+      </div>
+      <div>
+        <div class="bk-merchant-label" style="text-align:right;">Amount</div>
+        <div class="bk-amount-big"><span>৳</span><%= amount.toFixed(2) %></div>
+        <% if (payType === 'due' && label) { %>
+        <div style="font-size:11px;color:var(--bk-gray);text-align:right;"><%= label %></div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="bk-progress">
+      <div class="bk-prog-dot active" id="dot1"></div>
+      <div class="bk-prog-dot" id="dot2"></div>
+      <div class="bk-prog-dot" id="dot3"></div>
+    </div>
+
+    <!-- ── STEP 1: Enter bKash Number ── -->
+    <div class="bk-step active" id="step1">
+      <div class="bk-step-title">Enter your bKash Number</div>
+      <div class="bk-step-sub">The payment will be deducted from this bKash account.</div>
+
+      <div class="bk-error" id="err1"></div>
+
+      <div class="bk-input-wrap">
+        <span class="bk-flag">🇧🇩</span>
+        <input type="tel" class="bk-input" id="senderNumber"
+          placeholder="01XXXXXXXXX" maxlength="11" inputmode="numeric">
+      </div>
+
+      <div style="font-size:12px;color:var(--bk-gray);margin-bottom:16px;">
+        📋 <strong>Payment details:</strong>
+        <% if (payType === 'due') { %>
+        Hall due for <strong><%= label %></strong>
+        <% } else { %>
+        Meal token × <strong><%= qty %></strong>
+        <% } %>
+        — Amount: <strong>৳<%= amount.toFixed(2) %></strong>
+      </div>
+
+      <button class="bk-btn" onclick="goStep2()">Continue →</button>
+      <button class="bk-btn-outline" onclick="window.history.back()">✕ Cancel</button>
+    </div>
+
+    <!-- ── STEP 2: Enter PIN ── -->
+    <div class="bk-step" id="step2">
+      <div class="bk-back" onclick="goBack(1)">← Back</div>
+      <div class="bk-step-title">Enter bKash PIN</div>
+      <div class="bk-step-sub" id="pinSub">Sending <strong id="dispNum"></strong> → <strong><%= merchantNumber %></strong><br>Amount: <strong>৳<%= amount.toFixed(2) %></strong></div>
+
+      <div class="bk-error" id="err2"></div>
+
+      <div class="bk-pin-wrap" id="pinDots">
+        <div class="bk-pin-dot" id="pd0"></div>
+        <div class="bk-pin-dot" id="pd1"></div>
+        <div class="bk-pin-dot" id="pd2"></div>
+        <div class="bk-pin-dot" id="pd3"></div>
+        <div class="bk-pin-dot" id="pd4"></div>
+      </div>
+
+      <div class="bk-keypad">
+        <div class="bk-key" onclick="pinKey('1')">1</div>
+        <div class="bk-key" onclick="pinKey('2')">2</div>
+        <div class="bk-key" onclick="pinKey('3')">3</div>
+        <div class="bk-key" onclick="pinKey('4')">4</div>
+        <div class="bk-key" onclick="pinKey('5')">5</div>
+        <div class="bk-key" onclick="pinKey('6')">6</div>
+        <div class="bk-key" onclick="pinKey('7')">7</div>
+        <div class="bk-key" onclick="pinKey('8')">8</div>
+        <div class="bk-key" onclick="pinKey('9')">9</div>
+        <div class="bk-key empty"></div>
+        <div class="bk-key" onclick="pinKey('0')">0</div>
+        <div class="bk-key del" onclick="pinDel()">⌫</div>
+      </div>
+
+      <button class="bk-btn" id="pinConfirmBtn" onclick="confirmPin()" disabled>Confirm Payment</button>
+    </div>
+
+    <!-- ── STEP 3: Processing ── -->
+    <div class="bk-step" id="step3">
+      <div class="bk-processing">
+        <div class="bk-spinner"></div>
+        <div class="bk-processing-text" id="processingText">Processing Payment...</div>
+        <div class="bk-processing-sub" id="processingSub">Please do not close this window</div>
+      </div>
+    </div>
+
+    <!-- ── STEP 4: Success ── -->
+    <div class="bk-step" id="step4">
+      <div class="bk-success-screen">
+        <div class="bk-check-circle">✓</div>
+        <div class="bk-success-title">Payment Successful!</div>
+        <div class="bk-success-amount" id="successAmount"></div>
+
+        <div class="bk-receipt">
+          <div class="bk-receipt-row">
+            <span class="bk-receipt-label">Transaction ID</span>
+            <span class="bk-receipt-val txn" id="rcptTxn"></span>
+          </div>
+          <hr class="bk-receipt-divider">
+          <div class="bk-receipt-row">
+            <span class="bk-receipt-label">From</span>
+            <span class="bk-receipt-val" id="rcptFrom"></span>
+          </div>
+          <div class="bk-receipt-row">
+            <span class="bk-receipt-label">To</span>
+            <span class="bk-receipt-val" id="rcptTo"></span>
+          </div>
+          <div class="bk-receipt-row">
+            <span class="bk-receipt-label">Merchant</span>
+            <span class="bk-receipt-val">July-6 Hall (PUST)</span>
+          </div>
+          <hr class="bk-receipt-divider">
+          <div class="bk-receipt-row">
+            <span class="bk-receipt-label">Date & Time</span>
+            <span class="bk-receipt-val" id="rcptDate"></span>
+          </div>
+          <div class="bk-receipt-row">
+            <span class="bk-receipt-label">Status</span>
+            <span class="bk-receipt-val" style="color:var(--bk-success);">✓ Completed</span>
+          </div>
+        </div>
+
+        <div class="bk-token-box" id="tokenBox" style="display:none;">
+          <div class="bk-token-label">🎟️ Your Meal Token Code</div>
+          <div class="bk-token-code" id="tokenCodeDisplay"></div>
+          <div style="font-size:11px;opacity:0.8;margin-top:4px;">Show this at the dining hall</div>
+        </div>
+
+        <button class="bk-btn" onclick="goToDues()" id="doneBtn" style="margin-top:16px;">
+          ✓ Done — View Payments
+        </button>
+      </div>
+
+      <div class="bk-secure-badge">
+        🔒 Secured by bKash Payment Gateway
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const PAY_TYPE  = '<%= payType %>';
+  const DUE_ID    = '<%= dueId || "" %>';
+  const MENU_ID   = '<%= menuId || "" %>';
+  const AMOUNT    = '<%= amount.toFixed(2) %>';
+  const QTY       = '<%= qty %>';
+  const BACK_DUE  = '/student/dues';
+  const BACK_MEAL = '/student/meals';
+
+  // Normalize Bengali (Bangla) numerals to ASCII digits, in case the user
+  // typed the number using a Bangla keyboard/IME (০-৯ look like 0-9 but
+  // don't match \d in regex or JS number parsing).
+  function toAsciiDigits(str) {
+    const bn = '০১২৩৪৫৬৭৮৯';
+    return str.replace(/[০-৯]/g, d => bn.indexOf(d));
+  }
+
+  let pinValue = '';
+
+  // ── Step 1 → 2 ──
+  async function goStep2() {
+    const raw = document.getElementById('senderNumber').value;
+    const num = toAsciiDigits(raw).replace(/\D/g, '').trim();
+    const err = document.getElementById('err1');
+    err.classList.remove('show');
+
+    if (!/^01[3-9]\d{8}$/.test(num)) {
+      err.textContent = '⚠ Please enter a valid 11-digit bKash number (e.g. 01XXXXXXXXX)';
+      err.classList.add('show');
+      return;
+    }
+
+    const btn = event.currentTarget || document.querySelector('#step1 .bk-btn');
+
+    // Show initiating
+    const formData = new FormData();
+    formData.append('sender_number', num);
+    formData.append('amount', AMOUNT);
+    formData.append('pay_type', PAY_TYPE);
+    formData.append('due_id', DUE_ID);
+    formData.append('menu_id', MENU_ID);
+    formData.append('qty', QTY);
+
+    try {
+      const r = await fetch('/student/bkash/initiate', { method: 'POST', body: formData });
+      const d = await r.json();
+      if (!d.ok) {
+        err.textContent = '⚠ ' + d.message;
+        err.classList.add('show');
+        return;
+      }
+      document.getElementById('dispNum').textContent = num;
+      setStep(2);
+    } catch(e) {
+      err.textContent = '⚠ Network error. Please try again.';
+      err.classList.add('show');
+    }
+  }
+
+  // ── PIN input ──
+  function pinKey(digit) {
+    if (pinValue.length >= 5) return;
+    pinValue += digit;
+    updatePinDots();
+    document.getElementById('pinConfirmBtn').disabled = pinValue.length < 4;
+  }
+  function pinDel() {
+    pinValue = pinValue.slice(0, -1);
+    updatePinDots();
+    document.getElementById('pinConfirmBtn').disabled = pinValue.length < 4;
+  }
+  function updatePinDots() {
+    for (let i = 0; i < 5; i++) {
+      const d = document.getElementById('pd' + i);
+      d.classList.toggle('filled', i < pinValue.length);
+      d.textContent = i < pinValue.length ? '●' : '';
+    }
+  }
+
+  // ── Confirm PIN → Processing → Success ──
+  async function confirmPin() {
+    const err = document.getElementById('err2');
+    err.classList.remove('show');
+    if (pinValue.length < 4) {
+      err.textContent = '⚠ Please enter your 4 or 5-digit bKash PIN.';
+      err.classList.add('show');
+      return;
+    }
+
+    setStep(3);
+
+    // Simulate multi-stage processing
+    const stages = [
+      ['Verifying bKash account...', 'Authenticating your credentials', 800],
+      ['Connecting to bKash server...', 'Establishing secure connection', 900],
+      ['Initiating transfer...', 'Debiting your bKash wallet', 800],
+      ['Confirming payment...', 'Please wait a moment', 700],
+    ];
+    for (const [text, sub, delay] of stages) {
+      document.getElementById('processingText').textContent = text;
+      document.getElementById('processingSub').textContent = sub;
+      await sleep(delay);
+    }
+
+    // Execute real payment
+    const fd = new FormData();
+    fd.append('pin', pinValue);
+    try {
+      const r = await fetch('/student/bkash/execute', { method: 'POST', body: fd });
+      const d = await r.json();
+      if (!d.ok) {
+        // Show error back on pin step
+        pinValue = '';
+        updatePinDots();
+        document.getElementById('pinConfirmBtn').disabled = true;
+        document.getElementById('err2').textContent = '⚠ ' + d.message;
+        document.getElementById('err2').classList.add('show');
+        setStep(2);
+        return;
+      }
+      // Show success
+      showSuccess(d);
+    } catch(e) {
+      setStep(2);
+      document.getElementById('err2').textContent = '⚠ Network error. Please try again.';
+      document.getElementById('err2').classList.add('show');
+    }
+  }
+
+  function showSuccess(d) {
+    document.getElementById('successAmount').textContent = '৳' + parseFloat(d.amount).toFixed(2);
+    document.getElementById('rcptTxn').textContent = d.txnId;
+    document.getElementById('rcptFrom').textContent = d.senderNumber;
+    document.getElementById('rcptTo').textContent = d.merchantNumber;
+    const now = new Date();
+    document.getElementById('rcptDate').textContent = now.toLocaleString('en-BD', { dateStyle: 'medium', timeStyle: 'short' });
+
+    if (d.tokenCode) {
+      document.getElementById('tokenCodeDisplay').textContent = d.tokenCode;
+      document.getElementById('tokenBox').style.display = 'block';
+      document.getElementById('doneBtn').textContent = '✓ Done — View My Tokens';
+      document.getElementById('doneBtn').onclick = () => { window.location.href = BACK_MEAL; };
+    } else {
+      document.getElementById('doneBtn').onclick = () => { window.location.href = BACK_DUE; };
+    }
+    setStep(4);
+  }
+
+  // ── Navigation ──
+  function setStep(n) {
+    document.querySelectorAll('.bk-step').forEach((s,i) => s.classList.toggle('active', i+1 === n));
+    document.querySelectorAll('.bk-prog-dot').forEach((d,i) => d.classList.toggle('active', i+1 <= n));
+  }
+  function goBack(n) { setStep(n); }
+  function goToDues() { window.location.href = BACK_DUE; }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  // Enter key on number field
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('senderNumber').addEventListener('keydown', e => {
+      if (e.key === 'Enter') goStep2();
+    });
+  });
+</script>
+</body>
+</html>

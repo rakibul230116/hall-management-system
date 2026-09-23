@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> — July-6 Hall</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <%- include('partials/sidebar') %>
+  <div class="main-content">
+    <div class="topbar">
+      <h1>🔑 Seat Allocation</h1>
+      <button class="btn btn-primary" onclick="document.getElementById('allocateModal').classList.add('show')">+ Allocate Seat</button>
+    </div>
+    <div class="page-content">
+      <% if (success.length) { %><div class="alert alert-success">✓ <%= success %></div><% } %>
+      <% if (error.length) { %><div class="alert alert-error">✕ <%= error %></div><% } %>
+
+      <div class="alert" style="background:#e0f2fe;color:#075985;border-left:4px solid #0891b2;margin-bottom:16px;">
+        ⚡ <strong>Auto Due Generation:</strong> When you allocate a seat, the current month's hall fee is automatically generated for the student.
+      </div>
+
+      <% if (unallocated.length) { %>
+      <div class="alert" style="background:#fef3c7;color:#92400e;border-left:4px solid #f59e0b;">
+        ⚠️ <strong><%= unallocated.length %></strong> student(s) not yet allocated a room.
+      </div>
+      <% } %>
+
+      <div class="card">
+        <div class="card-header"><h3>Current Allocations (<%= allocations.length %>)</h3></div>
+        <div class="table-responsive">
+          <% if (allocations.length) { %>
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Student</th><th>Student ID</th><th>Room</th><th>Seat</th><th>Allocated On</th><th>Action</th></tr></thead>
+            <tbody>
+              <% allocations.forEach((a,i) => { %>
+              <tr>
+                <td><%= i+1 %></td>
+                <td><strong><%= a.student_name %></strong></td>
+                <td><code><%= a.student_id %></code></td>
+                <td>Room <%= a.room_number %></td>
+                <td>Seat #<%= a.seat_number %></td>
+                <td><%= new Date(a.allocated_date).toLocaleDateString() %></td>
+                <td>
+                  <form action="/admin/allocations/<%= a.id %>/vacate" method="POST" onsubmit="return confirm('Vacate this seat?')">
+                    <button class="btn btn-danger btn-sm">Vacate</button>
+                  </form>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+          <% } else { %>
+          <div class="empty-state"><div class="empty-icon">🔑</div><p>No seat allocations yet.</p></div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="allocateModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Allocate Seat</h3>
+      <button class="modal-close" onclick="document.getElementById('allocateModal').classList.remove('show')">✕</button>
+    </div>
+    <form action="/admin/allocations/add" method="POST">
+      <div class="form-group">
+        <label>Select Student *</label>
+        <select name="student_id" class="form-control" required>
+          <option value="">-- Select Unallocated Student --</option>
+          <% unallocated.forEach(s => { %><option value="<%= s.id %>"><%= s.name %> (<%= s.student_id %>)</option><% }) %>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Select Room *</label>
+        <select name="room_id" class="form-control" required>
+          <option value="">-- Select Available Room --</option>
+          <% availableRooms.forEach(r => { %><option value="<%= r.id %>">Room <%= r.room_number %> (<%= r.occupied %>/<%= r.capacity %> occupied)</option><% }) %>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Seat Number *</label><input type="number" name="seat_number" class="form-control" placeholder="1" min="1" required></div>
+        <div class="form-group"><label>Allocation Date *</label><input type="date" name="allocated_date" class="form-control" value="<%= new Date().toISOString().split('T')[0] %>" required></div>
+      </div>
+      <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:14px;margin-bottom:16px;">
+        <div style="font-size:12px;font-weight:700;color:#0369a1;margin-bottom:8px;">⚡ Auto-generate Monthly Due</div>
+        <div class="form-row">
+          <div class="form-group"><label>Hall Fee Amount (৳)</label><input type="number" name="due_amount" class="form-control" value="2000" step="0.01"></div>
+          <div class="form-group"><label>Due Date</label><input type="date" name="due_date" class="form-control"></div>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Allocate Seat & Generate Due</button>
+    </form>
+  </div>
+</div>
+</body></html>

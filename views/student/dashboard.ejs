@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>My Dashboard — July-6 Hall</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <%- include('partials/sidebar') %>
+  <div class="main-content">
+    <div class="topbar">
+      <div>
+        <h1 style="font-size:20px;font-weight:800;">🏠 My Dashboard</h1>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">July-6 Hall — PUST · <%= new Date().toDateString() %></div>
+      </div>
+    </div>
+    <div class="page-content">
+      <% if (success.length) { %><div class="alert alert-success">✓ <%= success %></div><% } %>
+      <% if (error.length) { %><div class="alert alert-error">✕ <%= error %></div><% } %>
+
+      <!-- Welcome Banner -->
+      <div style="background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:14px;padding:24px 28px;color:#fff;margin-bottom:20px;display:flex;align-items:center;gap:20px;">
+        <div style="width:56px;height:56px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;border:3px solid rgba(255,255,255,0.3);">
+          <%= student.name.charAt(0).toUpperCase() %>
+        </div>
+        <div>
+          <h2 style="font-size:20px;font-weight:800;margin-bottom:3px;">Welcome, <%= student.name %>! 👋</h2>
+          <p style="opacity:.8;font-size:13px;margin:0;">
+            <%= student.department||'' %><%= student.session?' · Session '+student.session:'' %>
+            <% if(student.room_number){%> · 🏠 Room <%= student.room_number %>, Seat #<%= student.seat_number %><%}%>
+          </p>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid" style="margin-bottom:20px;">
+        <div class="stat-card">
+          <div class="stat-icon <%= student.room_number?'green':'amber' %>"><%= student.room_number?'🏠':'❌' %></div>
+          <div><div class="stat-value"><%= student.room_number||'None' %></div><div class="stat-label">My Room</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon <%= unpaidDues>0?'red':'green' %>">💰</div>
+          <div><div class="stat-value"><%= unpaidDues %></div><div class="stat-label">Unpaid Dues</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon amber">💵</div>
+          <div><div class="stat-value">৳<%= Number(unpaidAmount).toLocaleString() %></div><div class="stat-label">Amount Due</div></div>
+        </div>
+      </div>
+
+      <div class="content-grid">
+        <!-- Today's Menu -->
+        <div class="card">
+          <div class="card-header"><h3>🍽️ Today's Menu</h3><a href="/student/meals" class="btn btn-sm btn-primary">Buy Token</a></div>
+          <div class="card-body">
+            <% if (todayMenus.length) { %>
+              <% todayMenus.forEach(m => { %>
+              <div class="meal-card" style="margin-bottom:10px;">
+                <div class="meal-card-header <%= m.meal_type %>">
+                  <%= m.meal_type==='breakfast'?'🌅 Breakfast':m.meal_type==='lunch'?'☀️ Lunch':'🌙 Dinner' %>
+                </div>
+                <div class="meal-card-body">
+                  <div class="meal-items"><%= m.items %></div>
+                  <div class="meal-price">৳<%= Number(m.price).toFixed(2) %>/serving</div>
+                </div>
+              </div>
+              <% }) %>
+            <% } else { %><div class="empty-state"><div class="empty-icon">🍽️</div><p>No menu for today.</p></div><% } %>
+          </div>
+        </div>
+
+        <!-- Notices -->
+        <div class="card">
+          <div class="card-header"><h3>📢 Latest Notices</h3><a href="/student/notices" class="btn btn-sm btn-outline">View All</a></div>
+          <div class="card-body">
+            <% if (recentNotices.length) { %>
+              <% recentNotices.forEach(n => { %>
+              <div class="notice-item <%= n.priority==='urgent'?'urgent':'' %>" style="margin-bottom:10px;">
+                <h4><% if(n.priority==='urgent'){%><span class="badge badge-danger" style="font-size:9px;margin-right:4px;">URGENT</span><%}%><%= n.title %></h4>
+                <p><%= n.content.substring(0,80) %><%= n.content.length>80?'...':'' %></p>
+                <div class="notice-meta"><%= new Date(n.created_at).toLocaleDateString() %></div>
+              </div>
+              <% }) %>
+            <% } else { %><div class="empty-state"><div class="empty-icon">📢</div><p>No notices.</p></div><% } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unpaid Dues Alert -->
+      <% if (unpaidDues > 0) { %>
+      <div style="margin-top:20px;background:#fef3c7;border:1px solid #fcd34d;border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div style="font-weight:700;color:#92400e;font-size:14px;">⚠️ You have <%= unpaidDues %> unpaid due(s)</div>
+          <div style="font-size:12px;color:#a16207;margin-top:2px;">Total: ৳<%= Number(unpaidAmount).toLocaleString() %> — Please pay promptly to avoid penalties</div>
+        </div>
+        <a href="/student/dues" class="btn btn-accent">Pay Now →</a>
+      </div>
+      <% } %>
+
+      <!-- Recent Complaints -->
+      <% if (myComplaints.length) { %>
+      <div class="card" style="margin-top:20px;">
+        <div class="card-header"><h3>📝 My Recent Complaints</h3><a href="/student/complaints" class="btn btn-sm btn-outline">View All</a></div>
+        <div class="card-body">
+          <% myComplaints.forEach(c => { %>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);">
+            <div>
+              <div style="font-weight:600;font-size:13px;"><%= c.subject %></div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+                <%= c.category==='water'?'💧':c.category==='electricity'?'⚡':c.category==='food'?'🍽️':'📋' %> <%= c.category %> · <%= new Date(c.created_at).toLocaleDateString() %>
+              </div>
+            </div>
+            <span class="badge badge-<%= c.status==='resolved'?'success':c.status==='in_progress'?'info':'warning' %>"><%= c.status.replace('_',' ') %></span>
+          </div>
+          <% }) %>
+        </div>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+</body></html>

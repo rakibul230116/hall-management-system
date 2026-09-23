@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Room Management — July-6 Hall</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <%- include('partials/sidebar') %>
+  <div class="main-content">
+    <div class="topbar">
+      <h1>🏠 Room Management</h1>
+      <button class="btn btn-primary" onclick="document.getElementById('addRoomModal').classList.add('show')">+ Add Room</button>
+    </div>
+    <div class="page-content">
+      <%- include("../partials/back-button") %>
+      <% if (success.length) { %><div class="alert alert-success">✓ <%= success %></div><% } %>
+      <% if (error.length) { %><div class="alert alert-error">✕ <%= error %></div><% } %>
+      <div class="card">
+        <div class="card-header"><h3>All Rooms (<%= rooms.length %>)</h3></div>
+        <div class="table-responsive">
+          <% if (rooms.length) { %>
+          <table class="data-table">
+            <thead><tr><th>Photo</th><th>Room No.</th><th>Floor</th><th>Type</th><th>Capacity</th><th>Occupied</th><th>Free</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <% rooms.forEach(r => { %>
+              <tr>
+                <td>
+                  <% if (r.photo) { %>
+                    <img src="/uploads/rooms/<%= r.photo %>" alt="Room <%= r.room_number %>" style="width:48px;height:36px;border-radius:6px;object-fit:cover;">
+                  <% } else { %>
+                    <div style="width:48px;height:36px;border-radius:6px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:16px;">🏠</div>
+                  <% } %>
+                </td>
+                <td><strong>Room <%= r.room_number %></strong></td>
+                <td>Floor <%= r.floor %></td>
+                <td style="text-transform:capitalize;"><%= r.type %></td>
+                <td><%= r.capacity %></td>
+                <td id="room-occupied-<%= r.id %>"><%= r.current_occupants %></td>
+                <td><strong id="room-free-<%= r.id %>"><%= r.capacity - r.current_occupants %></strong></td>
+                <td><span class="badge badge-<%= r.status==='available'?'success':r.status==='full'?'danger':'warning' %>" id="room-status-<%= r.id %>"><%= r.status %></span></td>
+                <td style="display:flex;gap:6px;">
+                  <button class="btn btn-sm btn-outline" onclick='openEditRoom(<%- JSON.stringify({id:r.id,room_number:r.room_number,floor:r.floor,capacity:r.capacity,type:r.type,photo:r.photo}) %>)'>✏️ Edit</button>
+                  <form action="/admin/rooms/<%= r.id %>/delete" method="POST" onsubmit="return confirm('Delete Room <%= r.room_number %>?<%= r.current_occupants > 0 ? ' This room still has '+r.current_occupants+' student(s) — deletion will be blocked.' : '' %>')">
+                    <button class="btn btn-danger btn-sm">Delete</button>
+                  </form>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+          <% } else { %><div class="empty-state"><div class="empty-icon">🏠</div><p>No rooms added yet.</p></div><% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop" id="addRoomModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Add New Room</h3>
+      <button class="modal-close" onclick="document.getElementById('addRoomModal').classList.remove('show')">✕</button>
+    </div>
+    <form action="/admin/rooms/add" method="POST">
+      <div class="form-row">
+        <div class="form-group"><label>Room Number *</label><input type="text" name="room_number" class="form-control" placeholder="e.g. 101" required></div>
+        <div class="form-group"><label>Floor *</label><input type="number" name="floor" class="form-control" placeholder="1" min="0" required></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Capacity *</label><input type="number" name="capacity" class="form-control" placeholder="4" min="1" required></div>
+        <div class="form-group"><label>Room Type</label>
+          <select name="type" class="form-control">
+            <option value="single">Single</option><option value="double">Double</option><option value="quad" selected>Quad</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Add Room</button>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Room Modal -->
+<div class="modal-backdrop" id="editRoomModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>✏️ Edit Room</h3>
+      <button class="modal-close" onclick="document.getElementById('editRoomModal').classList.remove('show')">✕</button>
+    </div>
+    <form id="editRoomForm" method="POST" enctype="multipart/form-data">
+      <div class="form-group" style="text-align:center;margin-bottom:14px;">
+        <img id="editRoomPhotoPreview" src="" alt="" style="width:120px;height:80px;border-radius:8px;object-fit:cover;display:none;margin:0 auto 8px;">
+        <input type="file" name="photo" accept="image/jpeg,image/png,image/webp" class="form-control" onchange="previewRoomPhoto(this)">
+        <small style="color:var(--muted);">JPG, PNG or WEBP, max 3MB. Leave empty to keep current photo.</small>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Room Number *</label><input type="text" name="room_number" id="editRoomNumber" class="form-control" required></div>
+        <div class="form-group"><label>Floor *</label><input type="number" name="floor" id="editRoomFloor" class="form-control" min="0" required></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Capacity *</label><input type="number" name="capacity" id="editRoomCapacity" class="form-control" min="1" required></div>
+        <div class="form-group"><label>Room Type</label>
+          <select name="type" id="editRoomType" class="form-control">
+            <option value="single">Single</option><option value="double">Double</option><option value="quad">Quad</option>
+          </select>
+        </div>
+      </div>
+      <small style="color:var(--muted);display:block;margin-bottom:10px;">⚠️ Capacity cannot be set below the number of students already assigned to this room.</small>
+      <button type="submit" class="btn btn-primary btn-full">Save Changes</button>
+    </form>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  function openEditRoom(r) {
+    document.getElementById('editRoomForm').action = `/admin/rooms/${r.id}/update`;
+    document.getElementById('editRoomNumber').value = r.room_number || '';
+    document.getElementById('editRoomFloor').value = r.floor || 0;
+    document.getElementById('editRoomCapacity').value = r.capacity || 1;
+    document.getElementById('editRoomType').value = r.type || 'quad';
+
+    const preview = document.getElementById('editRoomPhotoPreview');
+    if (r.photo) {
+      preview.src = `/uploads/rooms/${r.photo}`;
+      preview.style.display = 'block';
+    } else {
+      preview.style.display = 'none';
+    }
+    document.getElementById('editRoomModal').classList.add('show');
+  }
+
+  function previewRoomPhoto(input) {
+    const preview = document.getElementById('editRoomPhotoPreview');
+    if (input.files && input.files[0]) {
+      preview.src = URL.createObjectURL(input.files[0]);
+      preview.style.display = 'block';
+    }
+  }
+
+  // Real-time: if any admin/student action changes room occupancy
+  // elsewhere (allocate, vacate, transfer), refresh this page's room rows
+  // without requiring a manual reload.
+  try {
+    const socket = io();
+    socket.on('room:changed', () => {
+      // Simplest reliable approach: re-fetch this same page's data via a
+      // soft reload. Avoids needing to duplicate row-rendering logic in JS.
+      location.reload();
+    });
+  } catch (e) { console.warn('Socket.io unavailable on rooms page.', e); }
+</script>
+</body></html>

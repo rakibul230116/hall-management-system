@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Reports — July-6 Hall</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <%- include('partials/sidebar') %>
+  <div class="main-content">
+    <div class="topbar"><h1>📈 Reports & Analytics</h1></div>
+    <div class="page-content">
+      <div class="stats-grid" style="margin-bottom:24px;">
+        <div class="stat-card"><div class="stat-icon green">💰</div><div><div class="stat-value">৳<%= Number(totalPaid).toLocaleString() %></div><div class="stat-label">Total Revenue</div></div></div>
+        <div class="stat-card"><div class="stat-icon red">⚠️</div><div><div class="stat-value"><%= unpaidCount %></div><div class="stat-label">Unpaid Dues Count</div></div></div>
+        <div class="stat-card"><div class="stat-icon amber">📋</div><div><div class="stat-value">৳<%= Number(unpaidAmount).toLocaleString() %></div><div class="stat-label">Unpaid Amount</div></div></div>
+      </div>
+      <div class="content-grid">
+        <div class="card">
+          <div class="card-header"><h3>Revenue by Payment Type</h3></div>
+          <div class="card-body">
+            <% if (paymentsByType.length) { %>
+              <% paymentsByType.forEach(p => { %>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span><%= p.payment_type==='hall_fee'?'🏠':p.payment_type==='dining'?'🍽️':'💳' %></span>
+                  <span style="font-weight:600;text-transform:capitalize;"><%= p.payment_type.replace('_',' ') %></span>
+                </div>
+                <strong style="color:var(--primary);">৳<%= Number(p.total).toLocaleString() %></strong>
+              </div>
+              <% }) %>
+            <% } else { %><div class="empty-state"><p>No payment data.</p></div><% } %>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Monthly Revenue (Last 12)</h3></div>
+          <div class="table-responsive">
+            <% if (monthlyPayments.length) { %>
+            <table class="data-table">
+              <thead><tr><th>Month</th><th>Year</th><th>Total</th></tr></thead>
+              <tbody>
+                <% monthlyPayments.forEach(m => { %>
+                <tr><td><%= m.month %></td><td><%= m.year %></td><td><strong>৳<%= Number(m.total).toLocaleString() %></strong></td></tr>
+                <% }) %>
+              </tbody>
+            </table>
+            <% } else { %><div class="empty-state"><p>No monthly data yet.</p></div><% } %>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:20px;">
+        <div class="card-header"><h3>🔗 Quick Links</h3></div>
+        <div class="card-body" style="display:flex;gap:12px;flex-wrap:wrap;">
+          <a href="/admin/dues" class="btn btn-outline">📋 All Dues</a>
+          <a href="/admin/payments" class="btn btn-outline">💳 All Payments</a>
+          <a href="/admin/students" class="btn btn-outline">👥 Students</a>
+          <a href="/admin/complaints?status=pending" class="btn btn-outline">📝 Pending Complaints</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body></html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> — July-6 Hall</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <%- include('partials/sidebar') %>
+  <div class="main-content">
+    <div class="topbar"><h1>👤 My Profile</h1></div>
+    <div class="page-content">
+      <%- include("../partials/back-button") %>
+      <% if (success.length) { %><div class="alert alert-success">✓ <%= success %></div><% } %>
+      <% if (error.length) { %><div class="alert alert-error">✕ <%= error %></div><% } %>
+
+      <div class="content-grid">
+        <!-- Profile Info -->
+        <div class="card">
+          <div class="card-header"><h3>Profile Information</h3></div>
+          <div class="card-body">
+            <div style="text-align:center;margin-bottom:24px;">
+              <% if (student.photo) { %>
+                <img src="/uploads/profiles/<%= student.photo %>" alt="<%= student.name %>" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto 12px;border:3px solid var(--accent);display:block;">
+              <% } else { %>
+                <div style="width:80px;height:80px;border-radius:50%;background:var(--primary);color:#fff;font-size:32px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;border:3px solid var(--accent);">
+                  <%= student.name.charAt(0).toUpperCase() %>
+                </div>
+              <% } %>
+              <div style="font-size:18px;font-weight:800;color:var(--primary);"><%= student.name %></div>
+              <span class="badge badge-success" style="margin-top:6px;">Active Student</span>
+              <% if(student.room_number){ %>
+              <div style="margin-top:8px;"><span class="badge badge-info">🏠 Room <%= student.room_number %>, Seat #<%= student.seat_number %></span></div>
+              <% } %>
+            </div>
+            <div style="display:grid;gap:12px;">
+              <% const fields = [
+                {label:'Student ID', value: student.student_id||'—', icon:'🪪'},
+                {label:'Email', value: student.email, icon:'📧'},
+                {label:'Department', value: student.department||'—', icon:'🏛️'},
+                {label:'Session', value: student.session||'—', icon:'📅'},
+                {label:'Gender', value: (student.gender||'—').charAt(0).toUpperCase()+(student.gender||'').slice(1), icon:'👤'},
+                {label:'Joined', value: new Date(student.created_at).toLocaleDateString(), icon:'🗓️'},
+              ]; %>
+              <% fields.forEach(f => { %>
+              <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
+                <span style="font-size:18px;width:28px;text-align:center;"><%= f.icon %></span>
+                <div>
+                  <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;"><%= f.label %></div>
+                  <div style="font-size:14px;font-weight:500;"><%= f.value %></div>
+                </div>
+              </div>
+              <% }) %>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <!-- Edit Profile (opens in a small popup modal) -->
+          <div class="card">
+            <div class="card-header"><h3>✏️ Edit Profile</h3></div>
+            <div class="card-body">
+              <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Update your name, phone number, or profile photo.</p>
+              <button class="btn btn-primary btn-full" onclick="document.getElementById('editProfileModal').classList.add('show')">✏️ Edit Profile</button>
+            </div>
+          </div>
+
+          <!-- Change Password -->
+          <div class="card">
+            <div class="card-header"><h3>🔒 Change Password</h3></div>
+            <div class="card-body">
+              <form action="/student/profile/change-password" method="POST">
+                <div class="form-group">
+                  <label>Current Password</label>
+                  <div class="password-field">
+                    <input type="password" name="current_password" id="curPwInput" class="form-control" required>
+                    <button type="button" class="password-toggle" onclick="toggleVis('curPwInput', this)" aria-label="Show password">👁️</button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>New Password</label>
+                  <div class="password-field">
+                    <input type="password" name="new_password" id="newPwInput" class="form-control" minlength="6" required>
+                    <button type="button" class="password-toggle" onclick="toggleVis('newPwInput', this)" aria-label="Show password">👁️</button>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-outline">Change Password</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal-backdrop" id="editProfileModal">
+  <div class="modal-box" style="max-width:380px;">
+    <div class="modal-header">
+      <h3>✏️ Edit Profile</h3>
+      <button class="modal-close" onclick="document.getElementById('editProfileModal').classList.remove('show')">✕</button>
+    </div>
+    <form action="/student/profile/update" method="POST" enctype="multipart/form-data">
+      <div class="form-group" style="text-align:center;margin-bottom:14px;">
+        <% if (student.photo) { %>
+          <img id="profilePhotoPreview" src="/uploads/profiles/<%= student.photo %>" alt="" style="width:72px;height:72px;border-radius:50%;object-fit:cover;margin:0 auto 8px;display:block;">
+        <% } else { %>
+          <img id="profilePhotoPreview" src="" alt="" style="width:72px;height:72px;border-radius:50%;object-fit:cover;margin:0 auto 8px;display:none;">
+        <% } %>
+        <input type="file" name="photo" accept="image/jpeg,image/png,image/webp" class="form-control" onchange="previewProfilePhoto(this)">
+        <small style="color:var(--muted);">JPG, PNG or WEBP, max 3MB.</small>
+      </div>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" name="name" class="form-control" value="<%= student.name %>" required>
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="text" name="phone" class="form-control" value="<%= student.phone||'' %>" placeholder="01XXXXXXXXX">
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Save Changes</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  function previewProfilePhoto(input) {
+    const preview = document.getElementById('profilePhotoPreview');
+    if (input.files && input.files[0]) {
+      preview.src = URL.createObjectURL(input.files[0]);
+      preview.style.display = 'block';
+    }
+  }
+  function toggleVis(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const showing = input.type === 'text';
+    input.type = showing ? 'password' : 'text';
+    btn.textContent = showing ? '👁️' : '🙈';
+  }
+  <% if (typeof success !== 'undefined' && success === 'Profile updated successfully.') { %>
+  // Keep the modal closed after a successful save (page reload already does this naturally)
+  <% } %>
+</script>
+</body></html>

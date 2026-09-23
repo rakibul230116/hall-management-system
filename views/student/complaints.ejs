@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> — July-6 Hall</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <%- include('partials/sidebar') %>
+  <div class="main-content">
+    <div class="topbar">
+      <h1>📝 My Complaints</h1>
+      <button class="btn btn-primary" onclick="document.getElementById('submitModal').classList.add('show')">+ Submit Complaint</button>
+    </div>
+    <div class="page-content">
+      <% if (success.length) { %><div class="alert alert-success">✓ <%= success %></div><% } %>
+      <% if (complaints.length) { %>
+        <% complaints.forEach(c => { %>
+        <div class="card" style="margin-bottom:12px;">
+          <div class="card-body">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px;">
+              <div>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+                  <strong style="font-size:14px;"><%= c.subject %></strong>
+                  <span class="badge badge-secondary">
+                    <%= c.category==='water'?'💧 Water':c.category==='electricity'?'⚡ Electricity':c.category==='food'?'🍽️ Food Issue':c.category==='maintenance'?'🔧 Maintenance':c.category==='security'?'🔒 Security':'📋 Other' %>
+                  </span>
+                  <span class="badge badge-<%= c.status==='resolved'?'success':c.status==='in_progress'?'info':'warning' %>">
+                    <%= c.status.replace('_',' ') %>
+                  </span>
+                </div>
+                <div style="font-size:11px;color:var(--muted);">Submitted: <%= new Date(c.created_at).toLocaleString() %></div>
+              </div>
+            </div>
+            <p style="font-size:13px;color:var(--muted);margin-bottom:10px;"><%= c.description %></p>
+            <% if(c.admin_reply){ %>
+            <div class="complaint-reply">
+              <strong style="font-size:12px;color:var(--info);">Admin Reply</strong>
+              <% if(c.replied_at){ %><span style="font-size:11px;color:var(--muted);margin-left:8px;"><%= new Date(c.replied_at).toLocaleDateString() %></span><% } %>
+              <p style="margin-top:4px;"><%= c.admin_reply %></p>
+            </div>
+            <% } %>
+          </div>
+        </div>
+        <% }) %>
+      <% } else { %>
+      <div class="card"><div class="card-body">
+        <div class="empty-state">
+          <div class="empty-icon">📝</div>
+          <p>No complaints submitted yet.</p>
+          <button class="btn btn-primary" style="margin-top:12px;" onclick="document.getElementById('submitModal').classList.add('show')">Submit Your First Complaint</button>
+        </div>
+      </div></div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="submitModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Submit a Complaint</h3>
+      <button class="modal-close" onclick="document.getElementById('submitModal').classList.remove('show')">✕</button>
+    </div>
+    <form action="/student/complaints/submit" method="POST">
+      <div class="form-group">
+        <label>Category *</label>
+        <select name="category" class="form-control" required>
+          <option value="water">💧 Water Issue</option>
+          <option value="electricity">⚡ Electricity Issue</option>
+          <option value="food">🍽️ Food Issue</option>
+          <option value="maintenance">🔧 Maintenance</option>
+          <option value="security">🔒 Security</option>
+          <option value="other">📋 Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Subject *</label>
+        <input type="text" name="subject" class="form-control" placeholder="Brief subject of your complaint..." required>
+      </div>
+      <div class="form-group">
+        <label>Description *</label>
+        <textarea name="description" class="form-control" rows="5" placeholder="Describe the issue in detail..." required style="resize:vertical;"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Submit Complaint</button>
+    </form>
+  </div>
+</div>
+</body></html>

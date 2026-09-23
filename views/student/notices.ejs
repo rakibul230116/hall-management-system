@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Notice Board — July-6 Hall</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <%- include('partials/sidebar') %>
+  <div class="main-content">
+    <div class="topbar"><h1>📢 Notice Board</h1></div>
+    <div class="page-content">
+      <div class="card">
+        <div class="card-header"><h3>All Notices (<%= notices.length %>)</h3></div>
+        <div class="card-body">
+          <% if (notices.length) { %>
+            <% notices.forEach(n => { %>
+            <div class="notice-item <%= n.priority==='urgent'?'urgent':'' %>" style="margin-bottom:16px;">
+              <h4 style="font-size:15px;margin-bottom:8px;">
+                <% if(n.priority==='urgent'){%><span class="badge badge-danger" style="margin-right:6px;font-size:10px;">🔴 URGENT</span><%}%>
+                <%= n.title %>
+              </h4>
+              <% if(n.image_filename){ %>
+              <img src="/uploads/notices/<%= n.image_filename %>" alt="Notice Image"
+                   style="max-width:100%;max-height:260px;border-radius:10px;object-fit:cover;margin-bottom:10px;display:block;">
+              <% } else if(n.image_url){ %>
+              <img src="<%= n.image_url %>" alt="Notice Image"
+                   style="max-width:100%;max-height:260px;border-radius:10px;object-fit:cover;margin-bottom:10px;display:block;"
+                   onerror="this.style.display='none'">
+              <% } %>
+              <p style="font-size:13.5px;color:var(--text);line-height:1.7;white-space:pre-wrap;"><%= n.content %></p>
+              <div class="notice-meta" style="margin-top:10px;">
+                📌 Posted by <strong><%= n.posted_by_name %></strong> · <%= new Date(n.created_at).toLocaleString() %>
+              </div>
+            </div>
+            <% }) %>
+          <% } else { %>
+          <div class="empty-state"><div class="empty-icon">📢</div><p>No notices available.</p></div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body></html>

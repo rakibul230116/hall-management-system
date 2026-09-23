@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> — July-6 Hall</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <%- include('partials/sidebar') %>
+  <div class="main-content">
+    <div class="topbar">
+      <h1>🍽️ Meal Menus</h1>
+      <button class="btn btn-primary" onclick="document.getElementById('addMenuModal').classList.add('show')">+ Add Menu</button>
+    </div>
+    <div class="page-content">
+      <% if (success.length) { %><div class="alert alert-success">✓ <%= success %></div><% } %>
+      <% if (error.length) { %><div class="alert alert-error">✕ <%= error %></div><% } %>
+      <div class="card">
+        <div class="card-header"><h3>All Menus (<%= menus.length %>)</h3></div>
+        <div class="table-responsive">
+          <% if (menus.length) { %>
+          <table class="data-table">
+            <thead><tr><th>Date</th><th>Meal Type</th><th>Menu Items</th><th>Price</th><th>Added By</th><th>Action</th></tr></thead>
+            <tbody>
+              <% menus.forEach(m => { %>
+              <tr>
+                <td><strong><%= new Date(m.menu_date).toLocaleDateString('en-BD',{day:'numeric',month:'short',year:'numeric'}) %></strong></td>
+                <td>
+                  <span class="badge badge-<%= m.meal_type==='breakfast'?'warning':m.meal_type==='lunch'?'success':'info' %>">
+                    <%= m.meal_type==='breakfast'?'🌅 Breakfast':m.meal_type==='lunch'?'☀️ Lunch':'🌙 Dinner' %>
+                  </span>
+                </td>
+                <td style="max-width:280px;font-size:12px;white-space:pre-wrap;"><%= m.items %></td>
+                <td><strong>৳<%= Number(m.price).toFixed(2) %></strong></td>
+                <td><%= m.created_by_name %></td>
+                <td>
+                  <form action="/admin/menus/<%= m.id %>/delete" method="POST" onsubmit="return confirm('Delete this menu?')">
+                    <button class="btn btn-danger btn-sm">Delete</button>
+                  </form>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+          <% } else { %>
+          <div class="empty-state"><div class="empty-icon">🍽️</div><p>No menus added yet.</p></div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop" id="addMenuModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Add Meal Menu</h3>
+      <button class="modal-close" onclick="document.getElementById('addMenuModal').classList.remove('show')">✕</button>
+    </div>
+    <form action="/admin/menus/add" method="POST">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Date *</label>
+          <input type="date" name="menu_date" class="form-control" value="<%= new Date().toISOString().split('T')[0] %>" required>
+        </div>
+        <div class="form-group">
+          <label>Meal Type *</label>
+          <select name="meal_type" class="form-control" required>
+            <option value="breakfast">🌅 Breakfast</option>
+            <option value="lunch">☀️ Lunch</option>
+            <option value="dinner">🌙 Dinner</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Menu Items * <small style="color:var(--muted);font-weight:400;">(one per line or comma separated)</small></label>
+        <textarea name="items" class="form-control" rows="5" placeholder="Rice&#10;Dal&#10;Chicken Curry&#10;Salad&#10;Water" required style="resize:vertical;"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Price per Serving (৳) *</label>
+        <input type="number" name="price" class="form-control" placeholder="60.00" step="0.50" min="0" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Add Menu</button>
+    </form>
+  </div>
+</div>
+</body></html>

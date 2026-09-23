@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>July-6 Hall — PUST</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --primary:#0a2342;--primary-light:#1a4a8a;--accent:#f59e0b;
+      --accent2:#16a34a;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--bg:#f0f4f8;
+    }
+    body{font-family:'Segoe UI',system-ui,sans-serif;color:var(--text);}
+    a{text-decoration:none;color:inherit;}
+
+    /* ── NAVBAR ── */
+    .navbar{
+      position:fixed;top:0;left:0;right:0;z-index:1000;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 40px;height:70px;
+      background:rgba(10,35,66,0.96);
+      backdrop-filter:blur(10px);
+      border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+    .nav-brand{display:flex;align-items:center;gap:12px;}
+    .nav-logo{
+      width:46px;height:46px;border-radius:50%;object-fit:contain;
+      background:#fff;padding:3px;border:2px solid var(--accent);
+    }
+    .nav-logo-fallback{
+      width:46px;height:46px;border-radius:50%;background:var(--accent);
+      display:flex;align-items:center;justify-content:center;font-size:22px;
+    }
+    .nav-brand-text h1{font-size:17px;font-weight:800;color:#fff;line-height:1.1;}
+    .nav-brand-text span{font-size:11px;color:rgba(255,255,255,0.6);}
+    .nav-links{display:flex;align-items:center;gap:6px;}
+    .nav-links a{
+      color:rgba(255,255,255,0.85);font-size:13.5px;font-weight:500;
+      padding:8px 14px;border-radius:8px;transition:all .2s;
+    }
+    .nav-links a:hover{background:rgba(255,255,255,0.1);color:#fff;}
+    .btn-login{
+      background:rgba(255,255,255,0.12)!important;
+      border:1px solid rgba(255,255,255,0.25)!important;
+      color:#fff!important;
+    }
+    .btn-getstarted{
+      background:var(--accent)!important;color:#fff!important;
+      font-weight:700!important;margin-left:4px;
+      border:2px solid var(--accent)!important;
+    }
+    .btn-getstarted:hover{background:#d97706!important;transform:translateY(-1px);}
+
+    /* ── HERO ── */
+    .hero{
+      min-height:100vh;position:relative;
+      display:flex;align-items:center;justify-content:center;
+      text-align:center;padding:100px 20px 60px;
+    }
+    .hero-bg{
+      position:absolute;inset:0;
+      background:url('/images/hall-bg.jpg') center/cover no-repeat;
+    }
+    .hero-bg::after{
+      content:'';position:absolute;inset:0;
+      background:linear-gradient(160deg,rgba(10,35,66,0.90) 0%,rgba(10,50,100,0.80) 60%,rgba(0,0,0,0.70) 100%);
+    }
+    .hero-content{position:relative;z-index:1;max-width:760px;}
+    .hero-badge{
+      display:inline-block;background:var(--accent);color:#fff;
+      font-size:12px;font-weight:700;padding:5px 16px;border-radius:20px;
+      letter-spacing:.8px;text-transform:uppercase;margin-bottom:20px;
+    }
+    .hero h1{font-size:52px;font-weight:900;color:#fff;line-height:1.1;margin-bottom:16px;}
+    .hero h1 span{color:var(--accent);}
+    .hero p{font-size:17px;color:rgba(255,255,255,0.82);margin-bottom:32px;line-height:1.7;}
+    .hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+    .hero-btn{
+      padding:14px 32px;border-radius:10px;font-size:15px;font-weight:700;
+      cursor:pointer;border:none;transition:all .2s;display:inline-flex;align-items:center;gap:8px;
+    }
+    .hero-btn-primary{background:var(--accent);color:#fff;}
+    .hero-btn-primary:hover{background:#d97706;transform:translateY(-2px);box-shadow:0 8px 24px rgba(245,158,11,0.4);}
+    .hero-btn-outline{background:transparent;color:#fff;border:2px solid rgba(255,255,255,0.5);}
+    .hero-btn-outline:hover{background:rgba(255,255,255,0.1);border-color:#fff;}
+
+    /* Stats bar */
+    .stats-bar{
+      position:relative;z-index:1;
+      display:flex;justify-content:center;gap:0;
+      background:rgba(255,255,255,0.08);backdrop-filter:blur(8px);
+      border:1px solid rgba(255,255,255,0.15);border-radius:14px;
+      padding:20px 32px;margin-top:40px;flex-wrap:wrap;gap:0;
+    }
+    .stat-item{text-align:center;padding:0 28px;border-right:1px solid rgba(255,255,255,0.2);}
+    .stat-item:last-child{border-right:none;}
+    .stat-num{font-size:28px;font-weight:900;color:var(--accent);}
+    .stat-lbl{font-size:12px;color:rgba(255,255,255,0.7);margin-top:2px;}
+
+    /* ── SECTIONS ── */
+    section{padding:80px 20px;}
+    .container{max-width:1100px;margin:0 auto;}
+    .section-header{text-align:center;margin-bottom:52px;}
+    .section-tag{
+      display:inline-block;background:rgba(245,158,11,0.12);color:var(--accent);
+      font-size:12px;font-weight:700;padding:4px 14px;border-radius:20px;
+      text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;
+    }
+    .section-header h2{font-size:34px;font-weight:800;color:var(--primary);margin-bottom:12px;}
+    .section-header p{font-size:15px;color:var(--muted);max-width:560px;margin:0 auto;line-height:1.7;}
+
+    /* ── ABOUT ── */
+    .about-section{background:#fff;}
+    .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+    .about-img-wrap{position:relative;}
+    .about-img{
+      width:100%;border-radius:16px;object-fit:cover;height:400px;
+      background:linear-gradient(135deg,var(--primary),var(--primary-light));
+      display:flex;align-items:center;justify-content:center;font-size:80px;
+    }
+    .about-img img{width:100%;height:400px;border-radius:16px;object-fit:cover;}
+    .about-badge{
+      position:absolute;bottom:-18px;right:20px;
+      background:var(--accent);color:#fff;padding:12px 20px;border-radius:12px;
+      font-weight:800;font-size:13px;box-shadow:0 8px 24px rgba(245,158,11,0.4);
+    }
+    .about-text h3{font-size:28px;font-weight:800;color:var(--primary);margin-bottom:16px;line-height:1.3;}
+    .about-text p{font-size:14.5px;color:var(--muted);line-height:1.8;margin-bottom:14px;}
+    .about-features{display:flex;flex-direction:column;gap:10px;margin-top:20px;}
+    .feature-item{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500;}
+    .feature-icon{width:32px;height:32px;border-radius:8px;background:rgba(245,158,11,0.12);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+
+    /* ── CAMPUS GALLERY ── */
+    .gallery-section{background:var(--primary);padding:64px 0;overflow:hidden;}
+    .gallery-section .section-header h2{color:#fff;}
+    .gallery-section .section-header p{color:rgba(255,255,255,0.65);}
+    .gallery-section .section-tag{background:rgba(245,158,11,0.18);}
+    .gallery-strip{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:14px;max-width:1100px;margin:0 auto;padding:0 20px;height:280px;}
+    .gallery-strip a{display:block;height:100%;border-radius:14px;overflow:hidden;position:relative;}
+    .gallery-strip img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s ease;filter:saturate(1.05);}
+    .gallery-strip a:hover img{transform:scale(1.06);}
+    .gallery-strip a::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,rgba(0,0,0,0.55) 100%);}
+    .gallery-cap{position:absolute;bottom:10px;left:12px;right:12px;color:#fff;font-size:11.5px;font-weight:700;z-index:1;text-shadow:0 1px 4px rgba(0,0,0,0.5);}
+
+    /* ── PROVOST & STAFF ── */
+    .staff-section{background:var(--bg);}
+    .staff-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px;}
+    .staff-card{
+      background:#fff;border-radius:16px;padding:28px 20px;text-align:center;
+      border:1px solid var(--border);transition:all .2s;
+      box-shadow:0 2px 8px rgba(0,0,0,0.04);
+    }
+    .staff-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,0.10);}
+    .staff-avatar{
+      width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));
+      display:flex;align-items:center;justify-content:center;
+      font-size:30px;color:#fff;margin:0 auto 14px;border:3px solid var(--accent);
+    }
+    .staff-name{font-size:15px;font-weight:700;color:var(--primary);margin-bottom:4px;}
+    .staff-role{font-size:12px;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+    .staff-dept{font-size:12.5px;color:var(--muted);}
+
+    /* ── FACILITIES ── */
+    .facilities-section{background:#fff;}
+    .facilities-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;}
+    .facility-card{
+      border:1px solid var(--border);border-radius:14px;padding:24px 20px;text-align:center;
+      transition:all .2s;
+    }
+    .facility-card:hover{border-color:var(--accent);background:rgba(245,158,11,0.03);}
+    .facility-icon{font-size:36px;margin-bottom:12px;}
+    .facility-name{font-size:14px;font-weight:700;color:var(--primary);margin-bottom:6px;}
+    .facility-desc{font-size:12.5px;color:var(--muted);line-height:1.6;}
+
+    /* ── NOTICES ── */
+    .notices-section{background:var(--bg);}
+    .notice-card{
+      background:#fff;border-radius:12px;padding:20px 24px;
+      border-left:4px solid var(--primary-light);
+      box-shadow:0 2px 8px rgba(0,0,0,0.04);margin-bottom:14px;
+      display:flex;align-items:flex-start;gap:16px;
+    }
+    .notice-card.urgent{border-left-color:#dc2626;}
+    .notice-icon{font-size:24px;flex-shrink:0;margin-top:2px;}
+    .notice-title{font-size:15px;font-weight:700;margin-bottom:4px;}
+    .notice-body{font-size:13px;color:var(--muted);}
+    .notice-date{font-size:11px;color:var(--muted);margin-top:6px;}
+
+    /* ── LOCATION ── */
+    .location-section{background:#fff;}
+    .location-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;}
+    .location-info h3{font-size:22px;font-weight:800;color:var(--primary);margin-bottom:20px;}
+    .location-detail{display:flex;gap:14px;margin-bottom:18px;align-items:flex-start;}
+    .loc-icon{width:40px;height:40px;border-radius:10px;background:rgba(10,35,66,0.08);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+    .loc-label{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+    .loc-value{font-size:14px;font-weight:500;color:var(--text);}
+    .map-embed{border-radius:16px;overflow:hidden;border:1px solid var(--border);height:320px;background:linear-gradient(135deg,#e8f4f8,#cce4f0);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;}
+    .map-embed iframe{width:100%;height:100%;border:none;}
+
+    /* ── FOOTER ── */
+    footer{
+      background:var(--primary);color:rgba(255,255,255,0.8);
+      padding:48px 20px 24px;text-align:center;
+    }
+    footer .footer-logo{font-size:22px;font-weight:800;color:#fff;margin-bottom:6px;}
+    footer .footer-sub{font-size:13px;margin-bottom:24px;opacity:.7;}
+    footer .footer-links{display:flex;justify-content:center;gap:24px;margin-bottom:24px;flex-wrap:wrap;}
+    footer .footer-links a{color:rgba(255,255,255,0.7);font-size:13px;transition:.2s;}
+    footer .footer-links a:hover{color:var(--accent);}
+    footer .footer-bottom{font-size:12px;opacity:.5;border-top:1px solid rgba(255,255,255,0.1);padding-top:18px;margin-top:8px;}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:768px){
+      .navbar{padding:0 16px;}
+      .nav-links .hide-mobile{display:none;}
+      .hero h1{font-size:32px;}
+      .about-grid,.location-grid{grid-template-columns:1fr;}
+      .stat-item{padding:12px 16px;}
+      .gallery-strip{grid-template-columns:1fr 1fr;height:auto;grid-auto-rows:140px;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar">
+  <div class="nav-brand">
+    <img src="/images/pust-logo.png" alt="PUST" class="nav-logo"
+         onerror="this.style.display='none';document.getElementById('nlf').style.display='flex';">
+    <div class="nav-logo-fallback" id="nlf" style="display:none;">🏛️</div>
+    <div class="nav-brand-text">
+      <h1>July-6 Hall</h1>
+      <span>Pabna University of Science & Technology</span>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a href="#about" class="hide-mobile">About</a>
+    <a href="#staff" class="hide-mobile">Administration</a>
+    <a href="#facilities" class="hide-mobile">Facilities</a>
+    <a href="#location" class="hide-mobile">Location</a>
+    <a href="/auth/login" class="btn-login">Login</a>
+    <a href="/auth/register" class="btn-getstarted">Get Started →</a>
+  </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <span class="hero-badge">🏛️ Est. PUST — Pabna</span>
+    <h1>Welcome to<br><span>July-6 Hall</span></h1>
+    <p>A premier residential hall at Pabna University of Science & Technology, providing a safe, comfortable, and academic-friendly environment for students.</p>
+    <div class="hero-btns">
+      <a href="/auth/register" class="hero-btn hero-btn-primary">🎓 Student Registration</a>
+      <a href="/auth/login" class="hero-btn hero-btn-outline">🔐 Login to Portal</a>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-item"><div class="stat-num">900+</div><div class="stat-lbl">Students</div></div>
+      <div class="stat-item"><div class="stat-num">400+</div><div class="stat-lbl">Rooms</div></div>
+      <div class="stat-item"><div class="stat-num">10</div><div class="stat-lbl">Floors</div></div>
+      <div class="stat-item"><div class="stat-num">24</div><div class="stat-lbl">Security</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ ABOUT ══ -->
+<section class="about-section" id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-img-wrap">
+        <div class="about-img">
+          <img src="/images/hall-building.jpg" alt="July-6 Hall Building"
+               onerror="this.parentElement.innerHTML='🏛️'">
+        </div>
+        <div class="about-badge">📍 PUST Campus, Pabna</div>
+      </div>
+      <div class="about-text">
+        <div class="section-tag">About the Hall</div>
+        <h3>A Home Away<br>From Home</h3>
+        <p>July-6 Hall is one of the most prestigious residential halls of Pabna University of Science and Technology. Named in honor of a historic date, the hall has been serving students with dedication and care.</p>
+        <p>The hall provides modern facilities, a disciplined environment, and a strong sense of community that helps students excel academically and personally.</p>
+        <div class="about-features">
+          <div class="feature-item"><div class="feature-icon">🏠</div> Spacious rooms with proper ventilation</div>
+          <div class="feature-item"><div class="feature-icon">🍽️</div> Hygienic dining with daily meal tokens</div>
+          <div class="feature-item"><div class="feature-icon">📶</div> High-speed Wi-Fi across all floors</div>
+          <div class="feature-item"><div class="feature-icon">🔒</div> 24/7 security and CCTV surveillance</div>
+          <div class="feature-item"><div class="feature-icon">📚</div> Common room and reading area</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CAMPUS GALLERY (real photos) ══ -->
+<section class="gallery-section">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Campus Life</span>
+      <h2>Around PUST</h2>
+      <p>A glimpse of the campus our residents call home — from the July-6 monument to the lakeside walkways.</p>
+    </div>
+  </div>
+  <div class="gallery-strip">
+    <a href="/images/campus/dorms-night.jpg" target="_blank">
+      <img src="/images/campus/dorms-night.jpg" alt="Hall buildings at night">
+      <span class="gallery-cap">Residential halls at night</span>
+    </a>
+    <a href="/images/campus/july6-monument.jpg" target="_blank">
+      <img src="/images/campus/july6-monument.jpg" alt="July-6 monument">
+      <span class="gallery-cap">July-6 Monument</span>
+    </a>
+    <a href="/images/campus/canal-walkway.jpg" target="_blank">
+      <img src="/images/campus/canal-walkway.jpg" alt="Campus canal walkway">
+      <span class="gallery-cap">Lakeside walkway</span>
+    </a>
+    <a href="/images/campus/university-sign.jpg" target="_blank">
+      <img src="/images/campus/university-sign.jpg" alt="PUST entrance sign at night">
+      <span class="gallery-cap">Main entrance</span>
+    </a>
+  </div>
+</section>
+
+<!-- ══ ADMINISTRATION & STAFF ══ -->
+<section class="staff-section" id="staff">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Administration</span>
+      <h2>Provost & Staff</h2>
+      <p>Meet the dedicated team that manages July-6 Hall and ensures the well-being of all residents.</p>
+    </div>
+    <div class="staff-grid">
+      <% const roleIcon = { provost: '👨‍🏫', assistant_provost: '👨‍💼', staff: '🧑‍💼', contact: '📇' }; %>
+      <% const roleLabel = { provost: 'Provost', assistant_provost: 'Assistant Provost', staff: 'Hall Staff', contact: 'Contact' }; %>
+      <% if (typeof people !== 'undefined' && people.length) { %>
+        <% people.forEach(p => { %>
+        <div class="staff-card">
+          <% if (p.photo) { %>
+            <img src="/uploads/administration/<%= p.photo %>" alt="<%= p.name %>" class="staff-avatar" style="object-fit:cover;">
+          <% } else { %>
+            <div class="staff-avatar"><%= roleIcon[p.role_type] || '🧑‍💼' %></div>
+          <% } %>
+          <div class="staff-name"><%= p.name %></div>
+          <div class="staff-role"><%= p.designation || roleLabel[p.role_type] %></div>
+          <div class="staff-dept"><%= p.department||'' %><% if(p.department){%><br><%}%>July-6 Hall, PUST</div>
+        </div>
+        <% }) %>
+      <% } else { %>
+        <div class="staff-card">
+          <div class="staff-avatar">👨‍🏫</div>
+          <div class="staff-name">Provost</div>
+          <div class="staff-role">Provost</div>
+          <div class="staff-dept">July-6 Hall, PUST</div>
+        </div>
+        <div class="staff-card">
+          <div class="staff-avatar">👨‍💼</div>
+          <div class="staff-name">Assistant Provost</div>
+          <div class="staff-role">Assistant Provost</div>
+          <div class="staff-dept">July-6 Hall, PUST</div>
+        </div>
+        <p style="grid-column:1/-1;text-align:center;font-size:13px;color:var(--muted);margin-top:6px;">
+          💡 Add real Provost and Staff details from the Admin → Administration page.
+        </p>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FACILITIES ══ -->
+<section class="facilities-section" id="facilities">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Facilities</span>
+      <h2>What We Offer</h2>
+      <p>July-6 Hall provides all the essential facilities to make your stay comfortable and productive.</p>
+    </div>
+    <div class="facilities-grid">
+      <div class="facility-card"><div class="facility-icon">🏠</div><div class="facility-name">Comfortable Rooms</div><div class="facility-desc">Spacious, well-ventilated rooms with proper furniture</div></div>
+      <div class="facility-card"><div class="facility-icon">🍽️</div><div class="facility-name">Dining Hall</div><div class="facility-desc">Nutritious meals — breakfast, lunch & dinner daily</div></div>
+      <div class="facility-card"><div class="facility-icon">📶</div><div class="facility-name">Internet Access</div><div class="facility-desc">High-speed Wi-Fi available across all floors</div></div>
+      <div class="facility-card"><div class="facility-icon">🔒</div><div class="facility-name">24/7 Security</div><div class="facility-desc">Round-the-clock security with CCTV surveillance</div></div>
+      <div class="facility-card"><div class="facility-icon">💡</div><div class="facility-name">Power Backup</div><div class="facility-desc">Generator backup during load shedding</div></div>
+      <div class="facility-card"><div class="facility-icon">🚿</div><div class="facility-name">Clean Washrooms</div><div class="facility-desc">Well-maintained washrooms on every floor</div></div>
+      <div class="facility-card"><div class="facility-icon">📚</div><div class="facility-name">Reading Room</div><div class="facility-desc">Quiet study and reading area for students</div></div>
+      <div class="facility-card"><div class="facility-icon">🏥</div><div class="facility-name">Medical Support</div><div class="facility-desc">First aid facility and medical assistance</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ LOCATION ══ -->
+<section class="location-section" id="location">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Location</span>
+      <h2>Find Us</h2>
+      <p>July-6 Hall is located within the PUST campus in Pabna district, Bangladesh.</p>
+    </div>
+    <div class="location-grid">
+      <div class="location-info">
+        <h3>Contact & Address</h3>
+        <div class="location-detail">
+          <div class="loc-icon">📍</div>
+          <div>
+            <div class="loc-label">Address</div>
+            <div class="loc-value"><%= (typeof settings !== 'undefined' && settings.address) || 'July-6 Hall, Pabna University of Science & Technology, Shibpur, Pabna-6600, Bangladesh' %></div>
+          </div>
+        </div>
+        <div class="location-detail">
+          <div class="loc-icon">📞</div>
+          <div>
+            <div class="loc-label">Phone</div>
+            <div class="loc-value"><%= (typeof settings !== 'undefined' && settings.phone) || '+880-1310247351 (Provost Office)' %></div>
+          </div>
+        </div>
+        <div class="location-detail">
+          <div class="loc-icon">📧</div>
+          <div>
+            <div class="loc-label">Email</div>
+            <div class="loc-value"><%= (typeof settings !== 'undefined' && settings.email) || 'july6hall@pust.ac.bd' %></div>
+          </div>
+        </div>
+        <div class="location-detail">
+          <div class="loc-icon">🕐</div>
+          <div>
+            <div class="loc-label">Office Hours</div>
+            <div class="loc-value">Saturday – Thursday: 9:00 AM – 5:00 PM</div>
+          </div>
+        </div>
+        <div class="location-detail">
+          <div class="loc-icon">🌐</div>
+          <div>
+            <div class="loc-label">University Website</div>
+            <div class="loc-value"><a href="https://pust.ac.bd" target="_blank" style="color:var(--primary-light);">www.pust.ac.bd</a></div>
+          </div>
+        </div>
+      </div>
+      <div class="map-embed">
+        <iframe
+          src="<%= (typeof settings !== 'undefined' && settings.map_embed_url) || 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3632.4!2d89.2333!3d24.0!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sPabna+University!5e0!3m2!1sen!2sbd!4v1' %>"
+          width="100%" height="320" style="border:0;" allowfullscreen="" loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CTA ══ -->
+<section style="background:linear-gradient(135deg,var(--primary),var(--primary-light));padding:64px 20px;text-align:center;">
+  <div class="container">
+    <h2 style="font-size:32px;font-weight:900;color:#fff;margin-bottom:12px;">Ready to Join July-6 Hall?</h2>
+    <p style="font-size:15px;color:rgba(255,255,255,0.8);margin-bottom:28px;">Register now and access the digital hall management portal.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a href="/auth/register" style="padding:14px 32px;background:var(--accent);color:#fff;border-radius:10px;font-weight:700;font-size:15px;">🎓 Register as Student</a>
+      <a href="/auth/login" style="padding:14px 32px;background:rgba(255,255,255,0.15);color:#fff;border-radius:10px;font-weight:700;font-size:15px;border:2px solid rgba(255,255,255,0.4);">🔐 Login</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div class="footer-logo">🏛️ July-6 Hall</div>
+  <div class="footer-sub">Pabna University of Science & Technology</div>
+  <div class="footer-links">
+    <a href="#about">About</a>
+    <a href="#staff">Administration</a>
+    <a href="#facilities">Facilities</a>
+    <a href="#location">Location</a>
+    <a href="/auth/login">Login</a>
+    <a href="/auth/register">Register</a>
+  </div>
+  <div class="footer-bottom">© <%= new Date().getFullYear() %> July-6 Hall, PUST. All rights reserved.</div>
+</footer>
+
+<script>
+  // Smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const el = document.querySelector(a.getAttribute('href'));
+      if(el) el.scrollIntoView({ behavior:'smooth' });
+    });
+  });
+  // Navbar scroll effect
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('.navbar');
+    nav.style.background = window.scrollY > 60 ? 'rgba(10,35,66,0.98)' : 'rgba(10,35,66,0.96)';
+  });
+</script>
+</body>
+</html>

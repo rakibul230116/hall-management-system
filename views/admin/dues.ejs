@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> — July-6 Hall</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <%- include('partials/sidebar') %>
+  <div class="main-content">
+    <div class="topbar">
+      <h1>💰 Monthly Dues</h1>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-accent" onclick="document.getElementById('generateModal').classList.add('show')">⚡ Generate for All</button>
+        <button class="btn btn-primary" onclick="document.getElementById('addDueModal').classList.add('show')">+ Add Due</button>
+      </div>
+    </div>
+    <div class="page-content">
+      <% if (success.length) { %><div class="alert alert-success">✓ <%= success %></div><% } %>
+      <% if (error.length) { %><div class="alert alert-error">✕ <%= error %></div><% } %>
+
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-body" style="padding:14px 16px;">
+          <form class="search-bar" action="/admin/dues" method="GET">
+            <select name="month" class="form-control" style="max-width:160px;">
+              <option value="">All Months</option>
+              <% ['January','February','March','April','May','June','July','August','September','October','November','December'].forEach(m => { %>
+              <option value="<%= m %>" <%= month===m?'selected':'' %>><%= m %></option>
+              <% }) %>
+            </select>
+            <input type="number" name="year" class="form-control" style="max-width:100px;" placeholder="Year" value="<%= year||'' %>">
+            <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+            <a href="/admin/dues" class="btn btn-outline btn-sm">Reset</a>
+          </form>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>Due Records (<%= dues.length %>)</h3></div>
+        <div class="table-responsive">
+          <% if (dues.length) { %>
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Student</th><th>Student ID</th><th>Month/Year</th><th>Amount</th><th>Due Date</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <% dues.forEach((d,i) => { %>
+              <tr>
+                <td><%= i+1 %></td>
+                <td><%= d.name %></td>
+                <td><code><%= d.student_id %></code></td>
+                <td><%= d.month %> <%= d.year %></td>
+                <td><strong>৳<%= Number(d.amount).toLocaleString() %></strong></td>
+                <td><%= new Date(d.due_date).toLocaleDateString() %></td>
+                <td><span class="badge badge-<%= d.status==='paid'?'success':d.status==='waived'?'info':'danger' %>"><%= d.status %></span></td>
+                <td>
+                  <% if (d.status === 'unpaid') { %>
+                  <button class="btn btn-success btn-sm" onclick="openMarkPaid('<%= d.id %>','<%= d.name %>','<%= d.amount %>')">✓ Mark Paid</button>
+                  <% } else { %>
+                  <span style="color:var(--muted);font-size:12px;"><%= d.paid_on ? new Date(d.paid_on).toLocaleDateString() : '—' %></span>
+                  <% } %>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+          <% } else { %>
+          <div class="empty-state"><div class="empty-icon">💰</div><p>No due records found.</p></div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mark Paid Modal -->
+<div class="modal-backdrop" id="markPaidModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>✓ Mark Due as Paid</h3>
+      <button class="modal-close" onclick="document.getElementById('markPaidModal').classList.remove('show')">✕</button>
+    </div>
+    <div id="markPaidInfo" style="background:var(--bg);border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;"></div>
+    <form id="markPaidForm" method="POST">
+      <div class="form-group">
+        <label>Payment Method</label>
+        <select name="payment_method" class="form-control" id="admin_pay_method" onchange="toggleAdminBkash(this.value)">
+          <option value="cash">💵 Cash</option>
+          <option value="bkash">🔴 bKash</option>
+          <option value="online">🌐 Online Transfer</option>
+        </select>
+      </div>
+      <div id="admin_bkash_section" style="display:none;background:#fff0f6;border:1px solid #fbc8d9;border-radius:8px;padding:12px;margin-bottom:12px;">
+        <div style="background:#e2136e;color:#fff;font-weight:900;font-size:12px;padding:3px 8px;border-radius:5px;display:inline-block;margin-bottom:8px;">bKash</div>
+        <div class="form-group">
+          <label>Transaction ID</label>
+          <input type="text" name="transaction_id" class="form-control" placeholder="e.g. ABC1234567">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-success btn-full">Confirm Payment</button>
+    </form>
+  </div>
+</div>
+
+<!-- Generate Dues Modal -->
+<div class="modal-backdrop" id="generateModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>⚡ Generate Dues for All Students</h3>
+      <button class="modal-close" onclick="document.getElementById('generateModal').classList.remove('show')">✕</button>
+    </div>
+    <form action="/admin/dues/generate" method="POST">
+      <div class="form-row">
+        <div class="form-group"><label>Month *</label>
+          <select name="month" class="form-control" required>
+            <% ['January','February','March','April','May','June','July','August','September','October','November','December'].forEach(m => { %><option value="<%= m %>"><%= m %></option><% }) %>
+          </select>
+        </div>
+        <div class="form-group"><label>Year *</label><input type="number" name="year" class="form-control" value="<%= new Date().getFullYear() %>" required></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Amount (৳) *</label><input type="number" name="amount" class="form-control" placeholder="2000" step="0.01" required></div>
+        <div class="form-group"><label>Due Date *</label><input type="date" name="due_date" class="form-control" required></div>
+      </div>
+      <button type="submit" class="btn btn-accent btn-full">Generate Dues</button>
+    </form>
+  </div>
+</div>
+
+<!-- Add Individual Due Modal -->
+<div class="modal-backdrop" id="addDueModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Add Individual Due</h3>
+      <button class="modal-close" onclick="document.getElementById('addDueModal').classList.remove('show')">✕</button>
+    </div>
+    <form action="/admin/dues/add" method="POST">
+      <div class="form-group"><label>Student *</label>
+        <select name="student_id" class="form-control" required>
+          <option value="">-- Select Student --</option>
+          <% students.forEach(s => { %><option value="<%= s.id %>"><%= s.name %> (<%= s.student_id %>)</option><% }) %>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Month *</label>
+          <select name="month" class="form-control" required>
+            <% ['January','February','March','April','May','June','July','August','September','October','November','December'].forEach(m => { %><option value="<%= m %>"><%= m %></option><% }) %>
+          </select>
+        </div>
+        <div class="form-group"><label>Year *</label><input type="number" name="year" class="form-control" value="<%= new Date().getFullYear() %>" required></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Amount (৳) *</label><input type="number" name="amount" class="form-control" step="0.01" required></div>
+        <div class="form-group"><label>Due Date *</label><input type="date" name="due_date" class="form-control" required></div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full">Add Due</button>
+    </form>
+  </div>
+</div>
+
+<script>
+function openMarkPaid(dueId, name, amount) {
+  document.getElementById('markPaidInfo').innerHTML = '<strong>' + name + '</strong> — ৳' + Number(amount).toLocaleString();
+  document.getElementById('markPaidForm').action = '/admin/dues/' + dueId + '/paid';
+  document.getElementById('markPaidModal').classList.add('show');
+}
+function toggleAdminBkash(val) {
+  document.getElementById('admin_bkash_section').style.display = val === 'bkash' ? 'block' : 'none';
+}
+</script>
+</body></html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> — July-6 Hall</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .bkash-section{display:none;background:#fff0f6;border:1px solid #fbc8d9;border-radius:8px;padding:14px;margin-top:12px;}
+    .bkash-logo{background:#e2136e;color:#fff;font-weight:900;font-size:13px;padding:4px 10px;border-radius:6px;display:inline-block;margin-bottom:8px;}
+    .bkash-info{font-size:12px;color:#9d174d;line-height:1.6;margin-bottom:10px;}
+    .pay-method-row{display:flex;gap:8px;margin-bottom:0;}
+    .pay-method-btn{flex:1;padding:8px 4px;border:2px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:12px;font-weight:600;text-align:center;transition:.15s;}
+    .pay-method-btn.active{border-color:var(--primary);background:rgba(10,35,66,.05);}
+    .pay-method-btn.bkash-active{border-color:#e2136e;background:#fff0f6;color:#e2136e;}
+  </style>
+</head>
+<body>
+<div class="layout">
+  <%- include('partials/sidebar') %>
+  <div class="main-content">
+    <div class="topbar"><h1>💰 Dues & Payments</h1></div>
+    <div class="page-content">
+      <%- include("../partials/back-button") %>
+      <% if (success.length) { %><div class="alert alert-success">✓ <%= success %></div><% } %>
+      <% if (error.length) { %><div class="alert alert-error">✕ <%= error %></div><% } %>
+
+      <!-- Monthly Dues -->
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-header"><h3>📋 Monthly Dues</h3></div>
+        <div class="table-responsive">
+          <% if (dues.length) { %>
+          <table class="data-table">
+            <thead><tr><th>Month</th><th>Year</th><th>Amount</th><th>Due Date</th><th>Status</th><th>Pay</th></tr></thead>
+            <tbody>
+              <% dues.forEach(d => { %>
+              <tr>
+                <td><strong><%= d.month %></strong></td>
+                <td><%= d.year %></td>
+                <td><strong>৳<%= Number(d.amount).toLocaleString() %></strong></td>
+                <td><%= new Date(d.due_date).toLocaleDateString() %></td>
+                <td><span class="badge badge-<%= d.status==='paid'?'success':d.status==='waived'?'info':'danger' %>"><%= d.status %></span></td>
+                <td>
+                  <% if (d.status === 'unpaid') { %>
+                  <button class="btn btn-primary btn-sm" onclick="openPayModal('<%= d.id %>','<%= d.month %> <%= d.year %>','<%= d.amount %>')">
+                    💳 Pay Now
+                  </button>
+                  <% } else { %>
+                  <span style="font-size:12px;color:var(--muted);">✅ Paid</span>
+                  <% } %>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+          <% } else { %>
+          <div class="empty-state"><div class="empty-icon">💰</div><p>No dues assigned yet.</p></div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Payment History -->
+      <div class="card">
+        <div class="card-header"><h3>🧾 Payment History</h3></div>
+        <div class="table-responsive">
+          <% if (payments.length) { %>
+          <table class="data-table">
+            <thead><tr><th>Type</th><th>Amount</th><th>Month</th><th>Method</th><th>Txn ID</th><th>Date</th><th>Receipt</th></tr></thead>
+            <tbody>
+              <% payments.forEach(p => { %>
+              <tr>
+                <td><span class="badge badge-secondary"><%= p.payment_type.replace('_',' ') %></span></td>
+                <td><strong>৳<%= Number(p.amount).toLocaleString() %></strong></td>
+                <td><%= p.month ? p.month+' '+p.year : '—' %></td>
+                <td>
+                  <% if(p.payment_method==='bkash'){ %>
+                  <span style="background:#e2136e;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;">bKash</span>
+                  <% } else { %>
+                  <span class="badge badge-secondary"><%= p.payment_method %></span>
+                  <% } %>
+                </td>
+                <td><code style="font-size:11px;"><%= p.transaction_id||'—' %></code></td>
+                <td><%= new Date(p.payment_date).toLocaleDateString() %></td>
+                <td>
+                  <% if (p.payment_type === 'hall_fee' && p.status === 'paid') { %>
+                  <a href="/student/dues/receipt/<%= p.id %>" class="btn btn-sm btn-outline">📄 PDF</a>
+                  <% } else { %>—<% } %>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+          <% } else { %>
+          <div class="empty-state"><div class="empty-icon">💳</div><p>No payment records yet.</p></div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal-backdrop" id="payModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>💳 Pay Hall Due</h3>
+      <button class="modal-close" onclick="document.getElementById('payModal').classList.remove('show')">✕</button>
+    </div>
+    <div id="payModalInfo" style="background:var(--bg);border-radius:8px;padding:14px;margin-bottom:16px;">
+      <div style="font-size:13px;color:var(--muted);">Due for</div>
+      <div style="font-size:16px;font-weight:700;" id="payLabel"></div>
+      <div style="font-size:22px;font-weight:900;color:var(--primary);margin-top:4px;" id="payAmount"></div>
+    </div>
+    <form id="payForm" method="POST">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px;">Select Payment Method</div>
+      <div class="pay-method-row">
+        <div class="pay-method-btn active" onclick="selectDuePayment(this,'cash')">💵 Cash</div>
+        <div class="pay-method-btn" onclick="selectDuePayment(this,'bkash')">🔴 bKash</div>
+        <div class="pay-method-btn" onclick="selectDuePayment(this,'online')">🌐 Online</div>
+      </div>
+      <input type="hidden" name="payment_method" id="due_payment_method" value="cash">
+
+      <div class="bkash-section" id="due_bkash_section">
+        <div class="bkash-logo">bKash</div>
+        <div class="bkash-info">
+          You will be redirected to the secure bKash payment page.<br>
+          Pay to Hall bKash: <strong>01310247351</strong>
+        </div>
+        <button type="button" class="btn btn-full" onclick="openBkash()"
+          style="background:#e2136e;color:#fff;font-weight:700;padding:12px;border-radius:10px;border:none;font-size:15px;cursor:pointer;margin-top:6px;">
+          🔴 Pay with bKash
+        </button>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full" id="cashSubmitBtn" style="margin-top:16px;padding:12px;font-size:15px;">
+        Confirm Payment
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+let currentDueId = '', currentDueAmount = 0;
+
+function openPayModal(dueId, label, amount) {
+  currentDueId = dueId;
+  currentDueAmount = amount;
+  document.getElementById('payLabel').textContent = label;
+  document.getElementById('payAmount').textContent = '৳' + Number(amount).toLocaleString();
+  document.getElementById('payForm').action = '/student/dues/' + dueId + '/pay';
+  document.getElementById('cashSubmitBtn').style.display = 'block';
+  document.getElementById('payModal').classList.add('show');
+  selectDuePayment(document.querySelector('.pay-method-btn'), 'cash');
+}
+
+function selectDuePayment(el, method) {
+  document.querySelectorAll('.pay-method-btn').forEach(b => { b.classList.remove('active','bkash-active'); });
+  el.classList.add(method === 'bkash' ? 'bkash-active' : 'active');
+  document.getElementById('due_payment_method').value = method;
+  document.getElementById('due_bkash_section').style.display = method === 'bkash' ? 'block' : 'none';
+  document.getElementById('cashSubmitBtn').style.display = method === 'bkash' ? 'none' : 'block';
+}
+
+function openBkash() {
+  const label = document.getElementById('payLabel').textContent;
+  window.location.href = '/student/bkash/pay?type=due&id=' + currentDueId + '&amount=' + currentDueAmount + '&label=' + encodeURIComponent(label);
+}
+</script>
+</body></html>

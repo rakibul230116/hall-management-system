@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> — July-6 Hall</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .bkash-section{display:none;background:#fff0f6;border:1px solid #fbc8d9;border-radius:8px;padding:12px;margin-top:8px;}
+    .bkash-logo{background:#e2136e;color:#fff;font-weight:900;font-size:13px;padding:4px 10px;border-radius:6px;display:inline-block;margin-bottom:8px;}
+    .bkash-info{font-size:12px;color:#9d174d;margin-bottom:8px;line-height:1.5;}
+    .payment-method-btns{display:flex;gap:8px;margin-bottom:8px;}
+    .pm-btn{flex:1;padding:8px;border:2px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:12px;font-weight:600;text-align:center;transition:.2s;}
+    .pm-btn.selected{border-color:var(--primary);background:rgba(10,35,66,.06);color:var(--primary);}
+    .pm-btn.bkash-btn.selected{border-color:#e2136e;background:#fff0f6;color:#e2136e;}
+  </style>
+</head>
+<body>
+<div class="layout">
+  <%- include('partials/sidebar') %>
+  <div class="main-content">
+    <div class="topbar"><h1>🍽️ Dining & Meal Tokens</h1></div>
+    <div class="page-content">
+      <%- include("../partials/back-button") %>
+      <% if (success.length) { %><div class="alert alert-success">✓ <%= success %></div><% } %>
+      <% if (error.length) { %><div class="alert alert-error">✕ <%= error %></div><% } %>
+
+      <!-- Date picker -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-body" style="padding:14px 16px;">
+          <form class="search-bar" action="/student/meals" method="GET">
+            <label style="font-weight:600;font-size:13px;white-space:nowrap;">📅 View Menu for:</label>
+            <input type="date" name="date" class="form-control" style="max-width:180px;" value="<%= targetDate %>">
+            <button type="submit" class="btn btn-primary btn-sm">Go</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Today's Menus -->
+      <% if (menus.length) { %>
+      <div class="content-grid-3" style="margin-bottom:24px;">
+        <% menus.forEach(m => { %>
+        <div class="meal-card">
+          <div class="meal-card-header <%= m.meal_type %>">
+            <%= m.meal_type==='breakfast'?'🌅 Breakfast':m.meal_type==='lunch'?'☀️ Lunch':'🌙 Dinner' %>
+          </div>
+          <div class="meal-card-body">
+            <div class="meal-items" style="margin-bottom:10px;"><%= m.items %></div>
+            <div class="meal-price" style="margin-bottom:14px;">৳<%= Number(m.price).toFixed(2) %>/serving</div>
+
+            <form action="/student/meals/buy-token" method="POST" onsubmit="return validatePayment(this)">
+              <input type="hidden" name="menu_id" value="<%= m.id %>">
+              <div class="form-group" style="margin-bottom:10px;">
+                <label style="font-size:12px;">Quantity</label>
+                <input type="number" name="quantity" value="1" min="1" max="10" class="form-control" style="width:80px;padding:6px 8px;">
+              </div>
+
+              <!-- Payment Method Selection -->
+              <div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--text);">Payment Method</div>
+              <div class="payment-method-btns">
+                <div class="pm-btn selected" onclick="selectPayment(this,'cash','<%= m.id %>')">💵 Cash</div>
+                <div class="pm-btn bkash-btn" onclick="selectPayment(this,'bkash','<%= m.id %>')">🔴 bKash</div>
+              </div>
+              <input type="hidden" name="payment_method" value="cash" id="pm_<%= m.id %>">
+
+              <div class="bkash-section" id="bkash_<%= m.id %>">
+                <div class="bkash-logo">bKash</div>
+                <div class="bkash-info">
+                  You'll be taken to the secure bKash payment page.<br>
+                  Hall bKash: <strong>01310247351</strong>
+                </div>
+                <button type="button" class="btn btn-full"
+                  onclick="goToBkash('<%= m.id %>', this)"
+                  style="background:#e2136e;color:#fff;font-weight:700;padding:10px;border-radius:10px;border:none;font-size:14px;cursor:pointer;margin-top:6px;width:100%;">
+                  🔴 Pay with bKash
+                </button>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-sm btn-full cash-submit" id="cash_<%= m.id %>" style="margin-top:10px;">🎟️ Buy Token</button>
+            </form>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+      <% } else { %>
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-body">
+          <div class="empty-state"><div class="empty-icon">🍽️</div><p>No menu available for this date.</p></div>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- Token History -->
+      <div class="card">
+        <div class="card-header"><h3>🎟️ My Recent Tokens</h3></div>
+        <div class="table-responsive">
+          <% if (myTokens.length) { %>
+          <table class="data-table">
+            <thead><tr><th>Token Code</th><th>Date</th><th>Meal</th><th>Qty</th><th>Amount</th><th>Status</th><th>Receipt</th></tr></thead>
+            <tbody>
+              <% myTokens.forEach(t => { %>
+              <tr>
+                <td><span class="token-code"><%= t.token_code %></span></td>
+                <td><%= new Date(t.menu_date).toLocaleDateString() %></td>
+                <td><span class="badge badge-<%= t.meal_type==='breakfast'?'warning':t.meal_type==='lunch'?'success':'info' %>"><%= t.meal_type==='breakfast'?'🌅':t.meal_type==='lunch'?'☀️':'🌙' %> <%= t.meal_type %></span></td>
+                <td><%= t.quantity %></td>
+                <td><strong>৳<%= Number(t.total_amount).toFixed(2) %></strong></td>
+                <td><span class="badge badge-<%= t.status==='active'?'success':'secondary' %>"><%= t.status %></span></td>
+                <td><a href="/student/meals/receipt/<%= t.id %>" class="btn btn-sm btn-outline">📄 PDF</a></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+          <% } else { %>
+          <div class="empty-state"><div class="empty-icon">🎟️</div><p>No tokens purchased yet.</p></div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function selectPayment(el, method, menuId) {
+  el.closest('.payment-method-btns').querySelectorAll('.pm-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('pm_' + menuId).value = method;
+  const bkashDiv = document.getElementById('bkash_' + menuId);
+  bkashDiv.style.display = method === 'bkash' ? 'block' : 'none';
+  const cashBtn = document.getElementById('cash_' + menuId);
+  if (cashBtn) cashBtn.style.display = method === 'bkash' ? 'none' : 'block';
+}
+function validatePayment(form) {
+  const method = form.querySelector('[name="payment_method"]').value;
+  if (method === 'bkash') return false; // handled by goToBkash
+  return true;
+}
+function goToBkash(menuId, btn) {
+  const form = btn.closest('form');
+  const qty = form.querySelector('[name="quantity"]').value || 1;
+  // Read price from meal card
+  const priceEl = btn.closest('.meal-card-body').querySelector('.meal-price');
+  const price = parseFloat(priceEl ? priceEl.textContent.replace(/[^\d.]/g,'') : 0);
+  const total = (price * parseInt(qty)).toFixed(2);
+  window.location.href = '/student/bkash/pay?type=token&menu_id=' + menuId + '&amount=' + total + '&qty=' + qty;
+}
+</script>
+</body></html>

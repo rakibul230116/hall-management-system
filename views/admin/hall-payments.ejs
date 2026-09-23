@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Hall Payment History — July-6 Hall</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="layout">
+  <%- include('partials/sidebar') %>
+  <div class="main-content">
+    <div class="topbar"><h1>🏠 Hall Payment History</h1></div>
+    <div class="page-content">
+      <%- include('../partials/back-button') %>
+
+      <div class="stats-grid" style="margin-bottom:18px;">
+        <div class="stat-card">
+          <div class="stat-icon green">💰</div>
+          <div><div class="stat-value">৳<%= Number(totalHallRevenue||0).toLocaleString() %></div><div class="stat-label">Total Hall Revenue Collected</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">🧾</div>
+          <div><div class="stat-value"><%= payments.length %></div><div class="stat-label">Total Hall Transactions</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>Monthly Hall Dues — Payment History</h3></div>
+        <div class="table-responsive">
+          <% if (payments.length) { %>
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Student</th><th>ID</th><th>Month</th><th>Amount</th><th>Method</th><th>Transaction ID</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody>
+              <% payments.forEach((p,i) => { %>
+              <tr>
+                <td><%= i+1 %></td>
+                <td><%= p.name %></td>
+                <td><code><%= p.student_id %></code></td>
+                <td><%= p.month ? p.month+' '+p.year : '—' %></td>
+                <td><strong>৳<%= Number(p.amount).toLocaleString() %></strong></td>
+                <td>
+                  <% if(p.payment_method==='bkash'){ %>
+                  <span style="background:#e2136e;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;">bKash</span>
+                  <% } else { %><span class="badge badge-secondary"><%= p.payment_method %></span><% } %>
+                </td>
+                <td><code style="font-size:11px;"><%= p.transaction_id||'—' %></code></td>
+                <td><span class="badge badge-<%= p.status==='paid'?'success':'warning' %>"><%= p.status %></span></td>
+                <td style="font-size:12px;"><%= new Date(p.payment_date).toLocaleDateString() %></td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+          <% } else { %><div class="empty-state"><div class="empty-icon">🏠</div><p>No hall payment records yet.</p></div><% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body></html>
