@@ -1,6 +1,5 @@
 require('dotenv').config();
 
-
 process.on('unhandledRejection', (reason) => {
   console.error('🔥 Unhandled Promise Rejection (server stayed alive):', reason);
 });
@@ -18,7 +17,7 @@ const methodOverride = require('method-override');
 const path = require('path');
 
 const app = express();
-const server = http.createServer(app); // wrap express app so Socket.io can attach to it
+const server = http.createServer(app);
 const io = new Server(server);
 
 app.set('view engine', 'ejs');
@@ -37,7 +36,6 @@ app.use(session({
 
 app.use(flash());
 
-// Make io available to every controller via req.app.get('io')
 app.set('io', io);
 
 app.use((req, res, next) => {
@@ -47,12 +45,13 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routes
-app.use('/auth', require('./routes/auth'));
-app.use('/admin', require('./routes/admin'));
+// ── Routes ────────────────────────────────────────────────────────────────────
+app.use('/auth',    require('./routes/auth'));
+app.use('/admin',   require('./routes/admin'));
 app.use('/student', require('./routes/student'));
+app.use('/ai',      require('./routes/ai'));       // ✨ AI Routes
 
-// Home page (landing page — no login required)
+// ── Home Page ─────────────────────────────────────────────────────────────────
 app.get('/', asyncHandler(async (req, res) => {
   const db = require('./config/db');
   let people = [];
@@ -64,9 +63,6 @@ app.get('/', asyncHandler(async (req, res) => {
       'SELECT * FROM administration ORDER BY FIELD(role_type,"provost","assistant_provost","staff","contact"), display_order, id'
     );
   } catch (err) {
-    // administration table may not exist yet if the migration hasn't run —
-    // the homepage should still render with the default placeholder cards
-    // rather than crash.
     console.error('Homepage: could not load administration:', err.message);
   }
 
@@ -88,47 +84,32 @@ app.get('/', asyncHandler(async (req, res) => {
   res.render('home/index', { title: 'July-6 Hall — PUST', people, settings, notices });
 }));
 
-// 404
+// ── 404 ───────────────────────────────────────────────────────────────────────
 app.use((req, res) => res.status(404).render('auth/404', { title: '404 Not Found' }));
 
-// Global error handler — last line of defense. Without this, any
-// unhandled rejection in a route (e.g. a bad SQL query) crashes the
-// ENTIRE server process and takes down every user's session, not just
-// the one request that failed. This middleware catches anything that
-// reaches next(err) (including via the asyncHandler wrapper used in
-// routes/*.js) and shows a friendly error page instead of crashing.
+// ── Global Error Handler ──────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
   console.error('🔥 Unhandled route error:', err.message);
   if (process.env.NODE_ENV !== 'production') console.error(err.stack);
 
   if (req.flash) {
-    req.flash('error', 'Something went wrong on our end. Please try again — if this keeps happening, contact the hall admin.');
+    req.flash('error', 'Something went wrong. Please try again.');
   }
 
-  // Prefer redirecting back to where the user came from over a blank
-  // error page, so they don't lose their place in the app.
   const referer = req.get('Referer');
-  if (referer && !res.headersSent) {
-    return res.redirect(referer);
-  }
-  if (!res.headersSent) {
-    res.status(500).send('Something went wrong. Please go back and try again.');
-  }
+  if (referer && !res.headersSent) return res.redirect(referer);
+  if (!res.headersSent) res.status(500).send('Something went wrong. Please go back and try again.');
 });
 
+// ── Socket.io ─────────────────────────────────────────────────────────────────
 io.on('connection', (socket) => {
-  // Clients just listen for broadcasts; no inbound events needed yet.
-  // Future stages (rooms, payments, notices) can join rooms/namespaces here
-  // if updates ever need to be scoped to a specific student or admin.
+  // future: join rooms per student/admin
 });
 
+// ── Start Server ──────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
-const HOST = '0.0.0.0'; // bind to all network interfaces, not just localhost
+const HOST = '0.0.0.0';
 
-// Run any pending database migrations BEFORE accepting traffic, so the
-// app never starts in a half-migrated state where some columns exist
-// and others don't (the exact cause of every "Unknown column" crash
-// seen so far).
 const { runPendingMigrations } = require('./utils/migrate');
 
 runPendingMigrations().finally(() => {
@@ -137,17 +118,15 @@ runPendingMigrations().finally(() => {
     console.log(`🏛️  July-6 Hall Management System is running!`);
     console.log(`   Local:   http://localhost:${PORT}`);
 
-    // Print the LAN IP(s) so other devices on the same Wi-Fi/network can connect
     const interfaces = os.networkInterfaces();
     for (const name of Object.keys(interfaces)) {
       for (const iface of interfaces[name]) {
         if (iface.family === 'IPv4' && !iface.internal) {
-          console.log(`   Network: http://${iface.address}:${PORT}  (use this on phones/other devices)`);
+          console.log(`   Network: http://${iface.address}:${PORT}`);
         }
       }
     }
 
-    // Background jobs: auto-delete previous day's meal menu, auto-expire notices
     const { startScheduledJobs } = require('./utils/scheduledJobs');
     startScheduledJobs(io);
   });
